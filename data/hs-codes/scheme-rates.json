@@ -1,0 +1,22 @@
+[
+  { "hs_prefix": "0902", "description": "Tea", "rodtep_rate": 0.010, "drawback_rate": 0.015, "advance_auth_eligible": false, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "1006", "description": "Rice", "rodtep_rate": 0.0, "drawback_rate": 0.0, "advance_auth_eligible": false, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "5205", "description": "Cotton yarn", "rodtep_rate": 0.017, "drawback_rate": 0.020, "advance_auth_eligible": true, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "6109", "description": "Knitted T-shirts", "rodtep_rate": 0.023, "drawback_rate": 0.026, "advance_auth_eligible": true, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "6203", "description": "Woven apparel", "rodtep_rate": 0.023, "drawback_rate": 0.028, "advance_auth_eligible": true, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "4202", "description": "Bags/cases", "rodtep_rate": 0.015, "drawback_rate": 0.019, "advance_auth_eligible": false, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "6403", "description": "Leather footwear", "rodtep_rate": 0.018, "drawback_rate": 0.024, "advance_auth_eligible": true, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "7113", "description": "Jewellery", "rodtep_rate": 0.0, "drawback_rate": 0.0, "advance_auth_eligible": true, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "8471", "description": "Computers", "rodtep_rate": 0.008, "drawback_rate": 0.011, "advance_auth_eligible": false, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "8517", "description": "Telephony", "rodtep_rate": 0.010, "drawback_rate": 0.013, "advance_auth_eligible": false, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "8528", "description": "Televisions", "rodtep_rate": 0.012, "drawback_rate": 0.015, "advance_auth_eligible": false, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "8708", "description": "Vehicle parts", "rodtep_rate": 0.011, "drawback_rate": 0.014, "advance_auth_eligible": true, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "3004", "description": "Medicaments", "rodtep_rate": 0.008, "drawback_rate": 0.010, "advance_auth_eligible": true, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "3926", "description": "Plastic articles", "rodtep_rate": 0.013, "drawback_rate": 0.016, "advance_auth_eligible": false, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "4011", "description": "Tyres", "rodtep_rate": 0.014, "drawback_rate": 0.017, "advance_auth_eligible": false, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "7214", "description": "Steel bars/rods", "rodtep_rate": 0.010, "drawback_rate": 0.012, "advance_auth_eligible": true, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "9403", "description": "Furniture", "rodtep_rate": 0.020, "drawback_rate": 0.024, "advance_auth_eligible": false, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "3304", "description": "Cosmetics", "rodtep_rate": 0.015, "drawback_rate": 0.018, "advance_auth_eligible": false, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "6302", "description": "Terry towelling linen", "rodtep_rate": 0.022, "drawback_rate": 0.027, "advance_auth_eligible": true, "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "5701", "description": "Wool carpets", "rodtep_rate": 0.025, "drawback_rate": 0.030, "advance_auth_eligible": true, "source": "ILLUSTRATIVE-SEED" }
+]

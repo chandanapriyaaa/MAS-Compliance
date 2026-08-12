@@ -1,0 +1,22 @@
+[
+  { "hs_prefix": "0902", "description": "Tea", "basic_customs_duty": 1.000, "social_welfare_surcharge": 0.10, "igst": 0.05, "notes": "High BCD on tea imports; illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "1006", "description": "Rice", "basic_customs_duty": 0.700, "social_welfare_surcharge": 0.10, "igst": 0.05, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "5205", "description": "Cotton yarn", "basic_customs_duty": 0.050, "social_welfare_surcharge": 0.10, "igst": 0.05, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "6109", "description": "Knitted T-shirts", "basic_customs_duty": 0.200, "social_welfare_surcharge": 0.10, "igst": 0.05, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "6203", "description": "Woven apparel", "basic_customs_duty": 0.200, "social_welfare_surcharge": 0.10, "igst": 0.05, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "4202", "description": "Bags/cases", "basic_customs_duty": 0.150, "social_welfare_surcharge": 0.10, "igst": 0.18, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "6403", "description": "Leather footwear", "basic_customs_duty": 0.350, "social_welfare_surcharge": 0.10, "igst": 0.18, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "7113", "description": "Jewellery", "basic_customs_duty": 0.200, "social_welfare_surcharge": 0.10, "igst": 0.03, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "8471", "description": "Computers", "basic_customs_duty": 0.000, "social_welfare_surcharge": 0.10, "igst": 0.18, "notes": "ITA-bound; illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "8517", "description": "Telephony", "basic_customs_duty": 0.200, "social_welfare_surcharge": 0.10, "igst": 0.18, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "8528", "description": "Televisions", "basic_customs_duty": 0.200, "social_welfare_surcharge": 0.10, "igst": 0.28, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "8708", "description": "Vehicle parts", "basic_customs_duty": 0.150, "social_welfare_surcharge": 0.10, "igst": 0.28, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "3004", "description": "Medicaments", "basic_customs_duty": 0.100, "social_welfare_surcharge": 0.10, "igst": 0.12, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "3926", "description": "Plastic articles", "basic_customs_duty": 0.100, "social_welfare_surcharge": 0.10, "igst": 0.18, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "4011", "description": "Tyres", "basic_customs_duty": 0.100, "social_welfare_surcharge": 0.10, "igst": 0.28, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "7214", "description": "Steel bars/rods", "basic_customs_duty": 0.075, "social_welfare_surcharge": 0.10, "igst": 0.18, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "9403", "description": "Furniture", "basic_customs_duty": 0.200, "social_welfare_surcharge": 0.10, "igst": 0.18, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "3304", "description": "Cosmetics", "basic_customs_duty": 0.200, "social_welfare_surcharge": 0.10, "igst": 0.18, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "6302", "description": "Terry towelling linen", "basic_customs_duty": 0.250, "social_welfare_surcharge": 0.10, "igst": 0.05, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" },
+  { "hs_prefix": "5701", "description": "Wool carpets", "basic_customs_duty": 0.200, "social_welfare_surcharge": 0.10, "igst": 0.12, "notes": "Illustrative.", "source": "ILLUSTRATIVE-SEED" }
+]
