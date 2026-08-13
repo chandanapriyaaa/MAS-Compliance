@@ -84,7 +84,10 @@ export function ShipmentsTable({
                   <div className="truncate font-medium text-label" title={r.product_description}>
                     {r.product_description}
                   </div>
-                  <div className="text-[12px] text-label-tertiary">
+                  <div
+                    className="text-[12px] text-label-tertiary"
+                    suppressHydrationWarning
+                  >
                     {new Date(r.created_at).toLocaleString()}
                   </div>
                 </td>
