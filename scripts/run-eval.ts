@@ -35,6 +35,7 @@ async function main() {
   let correct = 0;
   let escalated = 0;
   const rows: string[] = [];
+  const samples: { conf: number; hit: boolean }[] = [];
 
   for (const c of set.cases) {
     const intake = await runIntake({
@@ -54,6 +55,7 @@ async function main() {
     const hit = predicted !== "" && predicted === expected;
     if (hit) correct++;
     if (result.insufficient_context) escalated++;
+    samples.push({ conf: result.confidence_score, hit });
 
     rows.push(
       `${c.id}  exp=${expected}  got=${predicted || "—"}  conf=${result.confidence_score
@@ -69,6 +71,36 @@ async function main() {
     100
   ).toFixed(1)}%`);
   console.log(`Escalated (insufficient context):     ${escalated}/${total}`);
+
+  // ── Confidence calibration ──
+  // Bucket predictions by reported confidence and compare bucket accuracy to
+  // the bucket's confidence midpoint. |gap| near 0 = well-calibrated.
+  console.log("\nConfidence calibration");
+  console.log("  bucket        n   acc     mean-conf   gap");
+  const bins = [
+    [0.0, 0.5],
+    [0.5, 0.7],
+    [0.7, 0.85],
+    [0.85, 0.95],
+    [0.95, 1.01],
+  ];
+  let ece = 0;
+  for (const [lo, hi] of bins) {
+    const inBin = samples.filter((s) => s.conf >= lo && s.conf < hi);
+    if (inBin.length === 0) {
+      console.log(`  [${lo.toFixed(2)},${hi >= 1 ? "1.00" : hi.toFixed(2)})   0   —`);
+      continue;
+    }
+    const acc = inBin.filter((s) => s.hit).length / inBin.length;
+    const meanConf = inBin.reduce((a, s) => a + s.conf, 0) / inBin.length;
+    const gap = acc - meanConf;
+    ece += (inBin.length / total) * Math.abs(gap);
+    console.log(
+      `  [${lo.toFixed(2)},${hi >= 1 ? "1.00" : hi.toFixed(2)})   ${String(inBin.length).padStart(2)}   ${(acc * 100).toFixed(0).padStart(3)}%    ${meanConf.toFixed(3)}      ${gap >= 0 ? "+" : ""}${gap.toFixed(3)}`,
+    );
+  }
+  console.log(`  Expected Calibration Error (ECE): ${ece.toFixed(3)} (lower is better)`);
+
   console.log(
     "\nNote: with the dev hashing embedder, accuracy will be low. Set a real embeddings provider and re-run.",
   );
