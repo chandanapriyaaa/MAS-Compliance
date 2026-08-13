@@ -4,16 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { LogEntry } from "@/app/api/shipment/[id]/logs/route";
 import { StatusPill } from "./ui/StatusPill";
 import { Meter } from "./ui/Meter";
+import { AgentFlow } from "./AgentFlow";
 import { cn } from "./ui/cn";
-
-const STEPS = [
-  { key: "intake", label: "Intake", done: "intake_complete" },
-  { key: "classify", label: "HS Classification", done: "classification_complete" },
-  { key: "crosscheck", label: "Scheme Cross-Check", done: "crosscheck_complete" },
-  { key: "duty", label: "Duty Calculator", done: "duty_complete" },
-  { key: "escalate", label: "Confidence Gate", done: "escalation_decision" },
-  { key: "docgen", label: "Documentation", done: "docgen_complete" },
-] as const;
 
 interface Payload {
   shipment: {
@@ -30,6 +22,8 @@ interface Payload {
     hs_code: string | null;
     confidence_score: number | null;
     aggregate_confidence: number | null;
+    reasoning: string | null;
+    retrieved_sources: any;
     scheme: any;
     duty: any;
     documents: any;
@@ -90,7 +84,6 @@ export function ShipmentDrawer({
   const s = data?.shipment;
   const c = data?.classification;
   const conf = c?.aggregate_confidence ?? c?.confidence_score ?? null;
-  const doneEvents = new Set((data?.logs ?? []).map((l) => l.event));
   const hasError = (data?.logs ?? []).some((l) => l.level === "error");
 
   return (
@@ -167,11 +160,10 @@ export function ShipmentDrawer({
           {!data ? (
             <div className="p-6 text-[13px] text-label-tertiary">Loading trail…</div>
           ) : tab === "workflow" ? (
-            <Workflow
+            <AgentFlow
               logs={data.logs}
               currentStep={s!.current_step}
               status={s!.classification_status}
-              doneEvents={doneEvents}
               classification={c ?? null}
             />
           ) : (
@@ -186,104 +178,6 @@ export function ShipmentDrawer({
         )}
       </aside>
     </div>
-  );
-}
-
-// ── Workflow stepper ───────────────────────────────────────────
-function Workflow({
-  logs,
-  currentStep,
-  status,
-  doneEvents,
-  classification,
-}: {
-  logs: LogEntry[];
-  currentStep: string;
-  status: string;
-  doneEvents: Set<string>;
-  classification: Payload["classification"];
-}) {
-  const timeFor = (event: string) =>
-    logs.find((l) => l.event === event)?.created_at;
-
-  function stateOf(step: (typeof STEPS)[number]): {
-    state: "done" | "active" | "pending" | "error" | "skipped";
-  } {
-    const stepErr = logs.some((l) => l.step === step.key && l.level === "error");
-    if (stepErr) return { state: "error" };
-    if (step.key === "duty" && doneEvents.has("duty_skipped") && !doneEvents.has("duty_complete"))
-      return { state: "skipped" };
-    if (doneEvents.has(step.done)) return { state: "done" };
-    if (currentStep === step.key && IN_FLIGHT.has(status)) return { state: "active" };
-    return { state: "pending" };
-  }
-
-  function detail(key: string): string | null {
-    if (!classification) return null;
-    if (key === "classify" && classification.hs_code)
-      return `${classification.hs_code} · ${Number(classification.confidence_score ?? 0).toFixed(2)}`;
-    if (key === "crosscheck" && classification.scheme) {
-      const sc = classification.scheme;
-      const parts = [];
-      if (sc.rodtep_rate != null) parts.push(`RoDTEP ${(sc.rodtep_rate * 100).toFixed(1)}%`);
-      if (sc.flags?.length) parts.push(`${sc.flags.length} flag(s)`);
-      return parts.join(" · ") || null;
-    }
-    if (key === "duty" && classification.duty)
-      return `${classification.duty.currency} ${Number(classification.duty.duty_amount).toLocaleString()}`;
-    if (key === "docgen" && classification.documents?.documents)
-      return `${classification.documents.documents.length} documents`;
-    return null;
-  }
-
-  return (
-    <ol className="relative p-5 pl-8">
-      <div className="absolute bottom-6 left-[18px] top-8 w-0.5 bg-separator" />
-      {STEPS.map((step) => {
-        const { state } = stateOf(step);
-        const t = timeFor(step.done);
-        const d = detail(step.key);
-        return (
-          <li key={step.key} className="relative mb-6 last:mb-0">
-            <span
-              className={cn(
-                "absolute -left-[26px] top-0.5 grid h-5 w-5 place-items-center rounded-full border-2",
-                state === "done" && "border-green bg-green",
-                state === "active" && "border-blue bg-blue animate-pulse",
-                state === "error" && "border-red bg-red",
-                state === "skipped" && "border-separator-strong bg-canvas",
-                state === "pending" && "border-separator-strong bg-canvas",
-              )}
-            >
-              {state === "done" && (
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                  <path d="m5 12.5 4.2 4.2L19 7" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </span>
-            <div className="flex items-baseline justify-between gap-2">
-              <span
-                className={cn(
-                  "text-[14px] font-medium",
-                  state === "pending" ? "text-label-tertiary" : "text-label",
-                )}
-              >
-                {step.label}
-              </span>
-              <span className="text-[11px] uppercase tracking-wide text-label-tertiary">
-                {state === "active" ? "running" : state}
-              </span>
-            </div>
-            {d && <div className="mt-0.5 font-mono text-[12px] text-label-secondary">{d}</div>}
-            {t && (
-              <div className="text-[11px] text-label-tertiary" suppressHydrationWarning>
-                {new Date(t).toLocaleTimeString()}
-              </div>
-            )}
-          </li>
-        );
-      })}
-    </ol>
   );
 }
 

@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card } from "./ui/Card";
 import { Button } from "./ui/Button";
 import { Field, Input, Textarea, Select } from "./ui/Field";
 
 /**
  * Intake form. POSTs to /api/shipment/intake and refreshes the list so the new
- * shipment appears and the live table starts tracking it.
+ * shipment appears and the live table starts tracking it. Rendered inside a
+ * modal, so it provides no frame of its own.
  */
-export function NewShipmentForm() {
+export function NewShipmentForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -44,6 +44,7 @@ export function NewShipmentForm() {
       setResult("Queued. The pipeline is running.");
       (e.target as HTMLFormElement).reset();
       router.refresh();
+      onSuccess?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -52,13 +53,12 @@ export function NewShipmentForm() {
   }
 
   return (
-    <Card className="p-6 lg:sticky lg:top-20">
-      <h2 className="text-[16px] font-semibold text-label">New shipment</h2>
-      <p className="mt-1 text-[13px] text-label-secondary">
+    <div>
+      <p className="text-[13px] text-label-secondary">
         Paste a product description, invoice text, or spec sheet.
       </p>
 
-      <form onSubmit={onSubmit} className="mt-5 space-y-4">
+      <form onSubmit={onSubmit} className="mt-4 space-y-4">
         <Field label="Product description" htmlFor="pd">
           <Textarea
             id="pd"
@@ -105,7 +105,7 @@ export function NewShipmentForm() {
         )}
         {error && <p className="text-[13px] font-medium text-red-ink">{error}</p>}
       </form>
-    </Card>
+    </div>
   );
 }
 

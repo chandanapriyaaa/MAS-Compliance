@@ -169,6 +169,86 @@ export function AreaSpark({
   );
 }
 
+// ── Radar / spider ─────────────────────────────────────────────
+export interface RadarAxis {
+  label: string;
+  /** Normalised 0..1. */
+  value: number;
+  /** Optional display value (e.g. "0.92", "88%"). */
+  display?: string;
+}
+
+export function Radar({
+  axes,
+  size = 260,
+}: {
+  axes: RadarAxis[];
+  size?: number;
+}) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const R = size / 2 - 34;
+  const n = axes.length;
+  const angle = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2;
+  const pt = (i: number, r: number) => [cx + Math.cos(angle(i)) * r, cy + Math.sin(angle(i)) * r];
+
+  const rings = [0.25, 0.5, 0.75, 1];
+  const poly = (r: (i: number) => number) =>
+    axes.map((_, i) => pt(i, r(i)).join(",")).join(" ");
+
+  const dataPoly = poly((i) => R * Math.max(0.02, Math.min(1, axes[i].value)));
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="mx-auto">
+      {/* grid rings */}
+      {rings.map((ring) => (
+        <polygon
+          key={ring}
+          points={poly(() => R * ring)}
+          fill="none"
+          stroke="var(--separator)"
+          strokeWidth="1"
+        />
+      ))}
+      {/* spokes */}
+      {axes.map((_, i) => {
+        const [x, y] = pt(i, R);
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="var(--separator)" strokeWidth="1" />;
+      })}
+      {/* data */}
+      <polygon
+        points={dataPoly}
+        fill="color-mix(in srgb, var(--blue) 22%, transparent)"
+        stroke="var(--blue)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      {axes.map((a, i) => {
+        const [x, y] = pt(i, R * Math.max(0.02, Math.min(1, a.value)));
+        return <circle key={i} cx={x} cy={y} r="3" fill="var(--blue)" />;
+      })}
+      {/* labels */}
+      {axes.map((a, i) => {
+        const [x, y] = pt(i, R + 16);
+        const anchor = Math.abs(x - cx) < 8 ? "middle" : x > cx ? "start" : "end";
+        return (
+          <text
+            key={i}
+            x={x}
+            y={y}
+            textAnchor={anchor as "middle" | "start" | "end"}
+            dominantBaseline="middle"
+            className="fill-[var(--label-secondary)] text-[10px]"
+          >
+            {a.label}
+            {a.display ? ` ${a.display}` : ""}
+          </text>
+        );
+      })}
+    </svg>
+  );
+}
+
 // ── Horizontal bar list (top-N) ────────────────────────────────
 export function HBars({
   data,

@@ -267,6 +267,46 @@
     margin-right: calc(50% - 50vw);
   }
 
+  /* Entry animation — auto-staggered children (no per-element edits) */
+  @keyframes enterUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .enter-stagger > * {
+    animation: enterUp 0.55s var(--spring-smooth) both;
+  }
+  .enter-stagger > *:nth-child(1) { animation-delay: 0.02s; }
+  .enter-stagger > *:nth-child(2) { animation-delay: 0.08s; }
+  .enter-stagger > *:nth-child(3) { animation-delay: 0.14s; }
+  .enter-stagger > *:nth-child(4) { animation-delay: 0.2s; }
+  .enter-stagger > *:nth-child(5) { animation-delay: 0.26s; }
+  .enter-stagger > *:nth-child(6) { animation-delay: 0.32s; }
+  .enter-stagger > *:nth-child(7) { animation-delay: 0.38s; }
+  .enter-stagger > *:nth-child(8) { animation-delay: 0.44s; }
+
+  /* Hover lift micro-interaction */
+  .lift {
+    transition:
+      transform var(--dur) var(--ease-spring),
+      box-shadow var(--dur) var(--ease-spring);
+  }
+  .lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  .press {
+    transition: transform var(--dur-fast) var(--ease-spring);
+  }
+  .press:active {
+    transform: scale(0.98);
+  }
+
   /* Scroll word-reveal: faded until lit */
   .rw {
     color: var(--label-quaternary);

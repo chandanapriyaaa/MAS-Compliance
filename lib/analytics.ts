@@ -9,6 +9,8 @@ interface ClassificationLite {
   confidence_score: number | null;
   aggregate_confidence: number | null;
   scheme: any;
+  duty: any;
+  is_final: boolean | null;
 }
 
 const CLEARED = new Set(["auto_approved", "human_approved"]);
@@ -98,10 +100,30 @@ export function buildAnalytics(
   // ── scheme eligibility ──
   let schemeEligible = 0;
   let schemeFlagged = 0;
+  let dutyCount = 0;
+  let finalCount = 0;
   for (const c of classifications) {
     if (c.scheme?.scheme_eligible) schemeEligible++;
     if (c.scheme?.requires_review || c.scheme?.flags?.length) schemeFlagged++;
+    if (c.duty) dutyCount++;
+    if (c.is_final) finalCount++;
   }
+
+  // ── radar: pipeline health (all axes normalised 0..1) ──
+  const nc = Math.max(1, classifications.length);
+  const pct = (x: number) => `${Math.round(x * 100)}%`;
+  const radar = [
+    {
+      label: "Confidence",
+      value: avgConfidence ?? 0,
+      display: avgConfidence != null ? avgConfidence.toFixed(2) : "n/a",
+    },
+    { label: "Auto-approve", value: autoRatePct / 100, display: `${autoRatePct}%` },
+    { label: "Scheme", value: schemeEligible / nc, display: pct(schemeEligible / nc) },
+    { label: "Duty", value: dutyCount / nc, display: pct(dutyCount / nc) },
+    { label: "Docs", value: finalCount / nc, display: pct(finalCount / nc) },
+    { label: "Clean", value: 1 - schemeFlagged / nc, display: pct(1 - schemeFlagged / nc) },
+  ];
 
   return {
     autoRatePct,
@@ -114,5 +136,6 @@ export function buildAnalytics(
     schemeEligible,
     schemeFlagged,
     avgConfidence,
+    radar,
   };
 }

@@ -1,7 +1,6 @@
 import { supabaseService } from "@/lib/supabase";
 import { env } from "@/lib/env";
 import type { ShipmentRow } from "@/app/api/shipments/route";
-import { NewShipmentForm } from "@/components/NewShipmentForm";
 import { ShipmentsTable } from "@/components/ShipmentsTable";
 import { SectionHeading } from "@/components/ui/Section";
 import { Card } from "@/components/ui/Card";
@@ -66,7 +65,7 @@ export default async function ShipmentsPage() {
     .limit(500);
   const { data: analyticsClass } = await svc
     .from("classifications")
-    .select("hs_code, confidence_score, aggregate_confidence, scheme")
+    .select("hs_code, confidence_score, aggregate_confidence, scheme, duty, is_final")
     .limit(1000);
   const analytics = buildAnalytics(
     analyticsShipments ?? [],
@@ -75,7 +74,7 @@ export default async function ShipmentsPage() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="enter-stagger space-y-8">
       <SectionHeading
         eyebrow="Dashboard"
         title="Shipments"
@@ -91,10 +90,7 @@ export default async function ShipmentsPage() {
 
       <Analytics data={analytics} />
 
-      <div className="grid gap-6 lg:grid-cols-[1.85fr_1fr]">
-        <ShipmentsTable initial={rows} threshold={threshold} />
-        <NewShipmentForm />
-      </div>
+      <ShipmentsTable initial={rows} threshold={threshold} />
     </div>
   );
 }
@@ -117,7 +113,7 @@ function Stat({
           ? "text-blue-ink"
           : "text-label";
   return (
-    <Card className="p-5">
+    <Card interactive className="p-5">
       <CountUp
         value={value}
         duration={800}

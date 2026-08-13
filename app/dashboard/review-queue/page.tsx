@@ -21,7 +21,7 @@ export default async function ReviewQueuePage() {
     .limit(100);
 
   return (
-    <div className="space-y-8">
+    <div className="enter-stagger space-y-8">
       <SectionHeading
         eyebrow="Human-in-the-loop"
         title="Review queue"
@@ -59,7 +59,7 @@ export default async function ReviewQueuePage() {
           const scheme = payload.scheme as Record<string, any> | null;
           const duty = payload.duty as Record<string, any> | null;
           return (
-            <Card key={item.id} className="p-6">
+            <Card key={item.id} interactive className="p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2.5">

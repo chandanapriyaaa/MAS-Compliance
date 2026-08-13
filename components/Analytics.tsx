@@ -1,5 +1,5 @@
 import { Card } from "./ui/Card";
-import { Donut, Bars, AreaSpark, HBars, type Slice } from "./charts/Charts";
+import { Donut, Bars, AreaSpark, HBars, Radar, type Slice, type RadarAxis } from "./charts/Charts";
 
 export interface AnalyticsData {
   autoRatePct: number;
@@ -12,6 +12,7 @@ export interface AnalyticsData {
   schemeEligible: number;
   schemeFlagged: number;
   avgConfidence: number | null;
+  radar: RadarAxis[];
 }
 
 function Panel({
@@ -24,7 +25,7 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="p-5">
+    <Card interactive className="p-5">
       <div className="mb-4 flex items-baseline justify-between">
         <h3 className="text-[14px] font-semibold text-label">{title}</h3>
         {hint && <span className="text-[12px] text-label-tertiary">{hint}</span>}
@@ -56,15 +57,17 @@ export function Analytics({ data }: { data: AnalyticsData }) {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Panel title="Top HS chapters" hint="by volume">
-            {data.topChapters.length ? (
-              <HBars data={data.topChapters} />
-            ) : (
-              <p className="text-[13px] text-label-tertiary">No classifications yet.</p>
-            )}
-          </Panel>
-        </div>
+        <Panel title="Pipeline health" hint="normalised 0–1">
+          <Radar axes={data.radar} />
+        </Panel>
+
+        <Panel title="Top HS chapters" hint="by volume">
+          {data.topChapters.length ? (
+            <HBars data={data.topChapters} />
+          ) : (
+            <p className="text-[13px] text-label-tertiary">No classifications yet.</p>
+          )}
+        </Panel>
 
         <Panel title="Scheme eligibility">
           <div className="space-y-4">
