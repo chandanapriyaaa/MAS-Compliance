@@ -117,12 +117,13 @@ export function buildAnalytics(
       label: "Confidence",
       value: avgConfidence ?? 0,
       display: avgConfidence != null ? avgConfidence.toFixed(2) : "n/a",
+      desc: "Avg derived confidence",
     },
-    { label: "Auto-approve", value: autoRatePct / 100, display: `${autoRatePct}%` },
-    { label: "Scheme", value: schemeEligible / nc, display: pct(schemeEligible / nc) },
-    { label: "Duty", value: dutyCount / nc, display: pct(dutyCount / nc) },
-    { label: "Docs", value: finalCount / nc, display: pct(finalCount / nc) },
-    { label: "Clean", value: 1 - schemeFlagged / nc, display: pct(1 - schemeFlagged / nc) },
+    { label: "Auto-approve", value: autoRatePct / 100, display: `${autoRatePct}%`, desc: "Cleared the threshold" },
+    { label: "Scheme", value: schemeEligible / nc, display: pct(schemeEligible / nc), desc: "DGFT-scheme eligible" },
+    { label: "Duty", value: dutyCount / nc, display: pct(dutyCount / nc), desc: "Duty computed" },
+    { label: "Docs", value: finalCount / nc, display: pct(finalCount / nc), desc: "Reached documentation" },
+    { label: "Clean", value: 1 - schemeFlagged / nc, display: pct(1 - schemeFlagged / nc), desc: "No scheme flags" },
   ];
 
   return {

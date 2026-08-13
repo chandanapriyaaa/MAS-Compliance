@@ -82,7 +82,7 @@ export function ShipmentDrawer({
   onClose: () => void;
 }) {
   const [data, setData] = useState<Payload | null>(null);
-  const [tab, setTab] = useState<"workflow" | "logs">("workflow");
+  const [tab, setTab] = useState<"workflow" | "documents" | "logs">("workflow");
   const dataRef = useRef<Payload | null>(null);
   dataRef.current = data;
 
@@ -188,21 +188,31 @@ export function ShipmentDrawer({
           </div>
 
           {/* tabs */}
-          <div className="mt-4 flex gap-1">
-            {(["workflow", "logs"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={cn(
-                  "rounded-full px-3.5 py-1.5 text-[13px] font-medium capitalize transition",
-                  tab === t
-                    ? "bg-[var(--fill-tertiary)] text-label"
-                    : "text-label-secondary hover:bg-[var(--fill-quaternary)]",
-                )}
-              >
-                {t === "logs" ? "Terminal logs" : "Workflow"}
-              </button>
-            ))}
+          <div className="mt-4 flex flex-wrap gap-1">
+            {(["workflow", "documents", "logs"] as const).map((t) => {
+              const label =
+                t === "logs" ? "Terminal logs" : t === "documents" ? "Documents" : "Workflow";
+              const docCount = data?.classification?.documents?.documents?.length ?? 0;
+              return (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className={cn(
+                    "rounded-full px-3.5 py-1.5 text-[13px] font-medium transition",
+                    tab === t
+                      ? "bg-[var(--fill-tertiary)] text-label"
+                      : "text-label-secondary hover:bg-[var(--fill-quaternary)]",
+                  )}
+                >
+                  {label}
+                  {t === "documents" && docCount > 0 && (
+                    <span className="ml-1.5 rounded-full bg-blue px-1.5 py-0.5 text-[10px] text-white">
+                      {docCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -210,6 +220,8 @@ export function ShipmentDrawer({
         <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           {!data ? (
             <div className="p-6 text-[13px] text-label-tertiary">Loading trail…</div>
+          ) : tab === "documents" ? (
+            <Documents data={data} />
           ) : tab === "workflow" ? (
             <AgentFlow
               logs={data.logs}
@@ -230,6 +242,133 @@ export function ShipmentDrawer({
       </aside>
     </div>
   );
+}
+
+// ── Generated documents ────────────────────────────────────────
+interface DraftDoc {
+  type: string;
+  title: string;
+  body: string;
+}
+
+function Documents({ data }: { data: Payload }) {
+  const docs = (data.classification?.documents?.documents ?? []) as DraftDoc[];
+  const disclaimer = data.classification?.documents?.disclaimer as string | undefined;
+
+  if (!data.classification?.is_final) {
+    return (
+      <div className="p-6 text-center">
+        <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-[var(--fill-tertiary)]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M7 3h7l4 4v14H7V3ZM14 3v4h4" stroke="var(--label-tertiary)" strokeWidth="1.6" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <p className="mt-3 text-[14px] font-medium text-label">No documents yet</p>
+        <p className="mt-1 text-[12px] text-label-tertiary">
+          Documents are drafted only after the classification is finalized
+          (auto-approved or human-approved).
+        </p>
+      </div>
+    );
+  }
+
+  if (docs.length === 0) {
+    return (
+      <div className="p-6 text-[13px] text-label-tertiary">
+        Finalized, but no documents were generated.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5 p-5">
+      <div className="flex items-center justify-between">
+        <p className="text-[12px] text-label-tertiary">
+          {docs.length} draft{docs.length === 1 ? "" : "s"}
+        </p>
+        <button
+          onClick={() => printDocuments(data, docs, disclaimer)}
+          className="rounded-full bg-blue px-3.5 py-1.5 text-[12px] font-medium text-white transition hover:brightness-110"
+        >
+          Print / Save as PDF
+        </button>
+      </div>
+
+      {docs.map((d, i) => (
+        <div key={i} className="overflow-hidden rounded-xl border border-separator">
+          <div className="flex items-center justify-between border-b border-separator bg-surface px-4 py-2.5">
+            <span className="text-[13px] font-semibold text-label">{d.title}</span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => navigator.clipboard?.writeText(d.body)}
+                className="rounded-md px-2 py-1 text-[11px] font-medium text-label-secondary transition hover:bg-[var(--fill-quaternary)]"
+              >
+                Copy
+              </button>
+              <button
+                onClick={() => downloadText(`${d.type}.txt`, d.body)}
+                className="rounded-md px-2 py-1 text-[11px] font-medium text-label-secondary transition hover:bg-[var(--fill-quaternary)]"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+          <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap break-words px-4 py-3 font-mono text-[12px] leading-relaxed text-label-secondary">
+            {d.body}
+          </pre>
+        </div>
+      ))}
+
+      {disclaimer && (
+        <p className="rounded-lg border border-amber-200/60 bg-[color-mix(in_srgb,var(--amber)_10%,transparent)] p-3 text-[12px] leading-relaxed text-amber-ink">
+          {disclaimer}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function downloadText(filename: string, text: string) {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/** Open a clean print window with the documents; user saves as PDF. */
+function printDocuments(data: Payload, docs: DraftDoc[], disclaimer?: string) {
+  const esc = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const s = data.shipment;
+  const c = data.classification;
+  const win = window.open("", "_blank", "width=820,height=1000");
+  if (!win) return;
+  win.document.write(`<!doctype html><html><head><meta charset="utf-8">
+    <title>Export documents — ${esc(s.id.slice(0, 8))}</title>
+    <style>
+      body{font:13px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#111;margin:40px;max-width:720px}
+      h1{font-size:18px;margin:0 0 4px} .meta{color:#666;font-size:12px;margin-bottom:24px}
+      .doc{margin:26px 0;page-break-inside:avoid}
+      .doc h2{font-size:14px;border-bottom:1px solid #ddd;padding-bottom:6px;margin:0 0 10px}
+      pre{white-space:pre-wrap;word-break:break-word;font:12px/1.6 ui-monospace,Menlo,monospace}
+      .disc{margin-top:28px;padding:12px;border:1px solid #e6c200;background:#fff8e1;border-radius:8px;font-size:12px;color:#7a5b00}
+      @media print{body{margin:24px}}
+    </style></head><body>
+    <h1>Trade Compliance Copilot — Export</h1>
+    <div class="meta">${esc(s.product_description)} · HS ${esc(c?.hs_code ?? "n/a")} · ${esc(
+      s.origin_country ?? "?",
+    )} → ${esc(s.dest_country ?? "?")} · ${esc(s.id)}</div>
+    ${docs
+      .map((d) => `<div class="doc"><h2>${esc(d.title)}</h2><pre>${esc(d.body)}</pre></div>`)
+      .join("")}
+    ${disclaimer ? `<div class="disc">${esc(disclaimer)}</div>` : ""}
+    </body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 300);
 }
 
 // ── Terminal log stream ────────────────────────────────────────

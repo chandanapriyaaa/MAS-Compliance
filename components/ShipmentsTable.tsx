@@ -137,20 +137,13 @@ export function ShipmentsTable({
       ) : (
         <Card className="overflow-hidden">
           <table className="w-full table-fixed text-left text-[14px]">
-            <colgroup>
-              <col />
-              <col className="w-[150px]" />
-              <col className="w-[120px]" />
-              <col className="w-[170px]" />
-              <col className="w-[160px]" />
-            </colgroup>
             <thead>
               <tr className="border-b border-separator text-[12px] uppercase tracking-wide text-label-tertiary">
-                <th className="px-5 py-3 font-medium">Product</th>
-                <th className="hidden px-5 py-3 font-medium md:table-cell">Route</th>
-                <th className="px-5 py-3 font-medium">HS code</th>
-                <th className="hidden px-5 py-3 font-medium sm:table-cell">Confidence</th>
-                <th className="px-5 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium sm:px-5">Product</th>
+                <th className="hidden w-[150px] px-5 py-3 font-medium md:table-cell">Route</th>
+                <th className="w-[104px] px-4 py-3 font-medium sm:px-5">HS code</th>
+                <th className="hidden w-[160px] px-5 py-3 font-medium sm:table-cell">Confidence</th>
+                <th className="w-[128px] px-4 py-3 font-medium sm:w-[150px] sm:px-5">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -160,7 +153,7 @@ export function ShipmentsTable({
                   onClick={() => setSelected(r.id)}
                   className="cursor-pointer border-b border-separator/60 transition-colors last:border-0 hover:bg-[var(--fill-quaternary)]"
                 >
-                  <td className="px-5 py-3.5">
+                  <td className="px-4 py-3.5 sm:px-5">
                     <div className="truncate font-medium text-label" title={r.product_description}>
                       {r.product_description}
                     </div>
@@ -171,13 +164,13 @@ export function ShipmentsTable({
                   <td className="hidden truncate px-5 py-3.5 text-label-secondary md:table-cell">
                     {(r.origin_country ?? "?") + " → " + (r.dest_country ?? "?")}
                   </td>
-                  <td className="truncate px-5 py-3.5 font-mono text-[13px] text-label">
+                  <td className="truncate px-4 py-3.5 font-mono text-[13px] text-label sm:px-5">
                     {r.hs_code ?? "n/a"}
                   </td>
                   <td className="hidden px-5 py-3.5 sm:table-cell">
                     <Meter value={r.confidence} threshold={threshold} />
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-4 py-3.5 sm:px-5">
                     <div className="flex items-center justify-between gap-2">
                       <StatusPill status={r.status} pulse={IN_FLIGHT.has(r.status)} />
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0 text-label-tertiary" aria-hidden>
