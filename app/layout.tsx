@@ -25,19 +25,18 @@ export default function RootLayout({
       <body>
         <div className="flex min-h-screen flex-col">
           <Nav />
-          <main className="mx-auto w-full max-w-content flex-1 px-5 py-10 sm:px-8">
+          <main className="mx-auto w-full max-w-content flex-1 px-5 pb-16 pt-24 sm:px-8">
             {children}
           </main>
           <footer className="border-t border-separator">
             <div className="mx-auto flex max-w-content flex-col gap-1 px-5 py-8 sm:px-8">
               <p className="text-[13px] text-label-secondary">
-                Trade Compliance Copilot — HS classification, DGFT scheme
-                cross-check, duty, and documentation with human-in-the-loop
-                escalation.
+                Trade Compliance Copilot. HS classification, DGFT cross-check,
+                duty, and documentation with human review.
               </p>
               <p className="text-xs text-label-tertiary">
-                Drafts are machine-generated and must be verified by a licensed
-                customs broker before filing.
+                Drafts are machine-generated. Verify with a licensed customs
+                broker before filing.
               </p>
             </div>
           </footer>

@@ -11,21 +11,21 @@ const LINKS = [
   { href: "/dashboard/review-queue", label: "Review Queue" },
 ];
 
-/** Sticky translucent (glass) top bar — chrome that defers to content. */
+/** Floating rounded Liquid-Glass capsule nav — chrome that defers to content. */
 export function Nav() {
   const pathname = usePathname();
   return (
-    <header className="glass sticky top-0 z-50">
-      <div className="mx-auto flex h-14 max-w-content items-center justify-between px-5 sm:px-8">
-        <Link href="/" className="flex items-center gap-2.5">
-          <BrandMark />
-          <span className="text-[15px] font-semibold tracking-tight text-label">
+    <div className="pointer-events-none fixed inset-x-0 top-3 z-50 flex justify-center px-3">
+      <header className="glass pointer-events-auto flex h-14 w-full max-w-3xl items-center justify-between gap-2 rounded-full pl-4 pr-2.5">
+        <Link href="/" className="relative z-[1] flex items-center gap-2">
+          <BrandMark size={24} />
+          <span className="hidden text-[14px] font-semibold tracking-tight text-label sm:block">
             Trade Compliance Copilot
           </span>
         </Link>
 
-        <div className="flex items-center gap-1">
-          <nav className="mr-1 hidden items-center gap-1 sm:flex">
+        <div className="relative z-[1] flex items-center gap-1">
+          <nav className="flex items-center gap-0.5">
             {LINKS.map((l) => {
               const active = pathname.startsWith(l.href);
               return (
@@ -33,10 +33,10 @@ export function Nav() {
                   key={l.href}
                   href={l.href}
                   className={cn(
-                    "rounded-full px-3.5 py-1.5 text-[13px] font-medium transition duration-[var(--dur-fast)]",
+                    "rounded-full px-3 py-1.5 text-[13px] font-medium transition duration-[var(--dur-fast)]",
                     active
                       ? "bg-[var(--fill-tertiary)] text-label"
-                      : "text-label-secondary hover:text-label hover:bg-[var(--fill-quaternary)]",
+                      : "text-label-secondary hover:bg-[var(--fill-quaternary)] hover:text-label",
                   )}
                 >
                   {l.label}
@@ -46,7 +46,7 @@ export function Nav() {
           </nav>
           <ThemeToggle />
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }

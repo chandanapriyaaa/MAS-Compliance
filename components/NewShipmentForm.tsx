@@ -41,7 +41,7 @@ export function NewShipmentForm() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Request failed");
-      setResult("Queued — the pipeline is running.");
+      setResult("Queued. The pipeline is running.");
       (e.target as HTMLFormElement).reset();
       router.refresh();
     } catch (err) {

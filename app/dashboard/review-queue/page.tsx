@@ -25,7 +25,7 @@ export default async function ReviewQueuePage() {
       <SectionHeading
         eyebrow="Human-in-the-loop"
         title="Review queue"
-        subtitle="Nothing here was auto-approved. Each item fell below the confidence threshold or was flagged for a scheme mismatch."
+        subtitle="Not auto-approved: below the confidence threshold, or flagged for a scheme mismatch."
       >
         <Pill tone={items && items.length ? "amber" : "green"}>
           {items?.length ?? 0} awaiting review
@@ -64,13 +64,13 @@ export default async function ReviewQueuePage() {
                 <div>
                   <div className="flex items-center gap-2.5">
                     <span className="font-mono text-[15px] font-semibold text-label">
-                      {payload.hs_code || "— no code produced"}
+                      {payload.hs_code || "no code produced"}
                     </span>
                     <Pill tone="amber">
                       conf{" "}
                       {item.min_confidence != null
                         ? Number(item.min_confidence).toFixed(2)
-                        : "—"}
+                        : "n/a"}
                     </Pill>
                   </div>
                   <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-label-secondary">

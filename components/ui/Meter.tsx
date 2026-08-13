@@ -39,7 +39,7 @@ export function Meter({
       </div>
       {showValue && (
         <span className="w-10 shrink-0 text-right font-mono text-xs tabular-nums text-label-secondary">
-          {v == null ? "—" : v.toFixed(2)}
+          {v == null ? "n/a" : v.toFixed(2)}
         </span>
       )}
     </div>

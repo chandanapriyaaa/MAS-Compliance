@@ -5,6 +5,7 @@ import { NewShipmentForm } from "@/components/NewShipmentForm";
 import { ShipmentsTable } from "@/components/ShipmentsTable";
 import { SectionHeading } from "@/components/ui/Section";
 import { Card } from "@/components/ui/Card";
+import { CountUp } from "@/components/motion/CountUp";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -60,7 +61,7 @@ export default async function ShipmentsPage() {
       <SectionHeading
         eyebrow="Dashboard"
         title="Shipments"
-        subtitle="Every shipment runs the full agent chain. Status and confidence update live as each step completes."
+        subtitle="Each shipment runs the full chain. Status and confidence update live."
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -97,9 +98,11 @@ function Stat({
           : "text-label";
   return (
     <Card className="p-5">
-      <div className={`text-[30px] font-semibold leading-none ${color}`}>
-        {value}
-      </div>
+      <CountUp
+        value={value}
+        duration={800}
+        className={`block text-[30px] font-semibold leading-none ${color}`}
+      />
       <div className="mt-1.5 text-[13px] text-label-secondary">{label}</div>
     </Card>
   );

@@ -95,7 +95,7 @@ export function ShipmentsTable({
                   {(r.origin_country ?? "?") + " → " + (r.dest_country ?? "?")}
                 </td>
                 <td className="px-5 py-3.5 font-mono text-[13px] text-label">
-                  {r.hs_code ?? "—"}
+                  {r.hs_code ?? "n/a"}
                 </td>
                 <td className="hidden w-48 px-5 py-3.5 sm:table-cell">
                   <Meter value={r.confidence} threshold={threshold} />
