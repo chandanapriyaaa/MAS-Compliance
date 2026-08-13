@@ -25,10 +25,21 @@ export const env = {
   groqApiKey: () => required("GROQ_API_KEY"),
   groqModel: () => optional("GROQ_MODEL", "llama-3.3-70b-versatile"),
 
-  // Supabase (server)
-  supabaseUrl: () => required("SUPABASE_URL"),
-  supabaseServiceRoleKey: () => required("SUPABASE_SERVICE_ROLE_KEY"),
-  supabaseAnonKey: () => required("SUPABASE_ANON_KEY"),
+  // Supabase (server). Accept both the legacy service_role/anon names and the
+  // new secret/publishable key scheme, so either works.
+  supabaseUrl: () =>
+    process.env.SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    required("SUPABASE_URL"),
+  supabaseServiceRoleKey: () =>
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SECRET_KEY ||
+    required("SUPABASE_SERVICE_ROLE_KEY"),
+  supabaseAnonKey: () =>
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    required("SUPABASE_ANON_KEY"),
 
   // Upstash Redis
   redisUrl: () => required("UPSTASH_REDIS_REST_URL"),
