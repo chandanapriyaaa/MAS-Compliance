@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { cn } from "@/components/ui/cn";
 import { ScrollFX } from "@/components/motion/ScrollFX";
-import { AuroraCanvas } from "@/components/motion/AuroraCanvas";
+import { GoodsTile, type GoodsVariant } from "@/components/motion/GoodsTile";
 import { ProductPreview } from "@/components/motion/ProductPreview";
 import { PipelineScrolly } from "@/components/motion/PipelineScrolly";
 import { CountUp } from "@/components/motion/CountUp";
@@ -14,46 +15,33 @@ export default function HomePage() {
       <ScrollFX />
       <div className="scroll-progress" aria-hidden />
 
-      {/* ── Hero (full-bleed, gradient runs to the very top behind the nav) ── */}
-      <section className="bleed grain relative -mt-24 overflow-hidden pt-24">
-        {/* abstract ambient visual, edges masked so it melts into the page */}
+      {/* ── Hero — clean/light, image tiles carry the colour (Locus cue) ── */}
+      <section className="bleed relative -mt-24 overflow-hidden pt-24">
+        {/* barely-there warm-cool wash so pure white is not stark */}
         <div
+          aria-hidden
           className="pointer-events-none absolute inset-0"
           style={{
-            maskImage:
-              "radial-gradient(120% 100% at 50% 20%, #000 45%, transparent 100%)",
-            WebkitMaskImage:
-              "radial-gradient(120% 100% at 50% 20%, #000 45%, transparent 100%)",
+            background:
+              "radial-gradient(60% 50% at 50% 8%, color-mix(in srgb, var(--blue) 8%, transparent), transparent 70%)",
           }}
-        >
-          <AuroraCanvas className="absolute inset-0 h-full w-full" />
-        </div>
+        />
+
+        {/* scattered floating photo tiles */}
+        <FloatTile variant="textile" className="left-[3%] top-[26%] h-28 w-28" rotate="-11deg" delay="0s" />
+        <FloatTile variant="spice" className="left-[9%] top-[64%] h-24 w-24" rotate="7deg" delay="1.1s" />
+        <FloatTile variant="ocean" className="right-[4%] top-[20%] h-28 w-28" rotate="9deg" delay="0.5s" />
+        <FloatTile variant="agri" className="right-[6%] top-[62%] h-32 w-32" rotate="-8deg" delay="1.5s" />
 
         <div className="relative mx-auto max-w-content px-5 pb-20 pt-16 text-center sm:px-8 sm:pt-24">
           <h1
             data-reveal
-            className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-4 gap-y-3 text-[48px] font-semibold leading-[1.05] tracking-[-0.035em] text-label sm:text-[78px]"
+            className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-4 gap-y-3 text-[48px] font-semibold leading-[1.02] tracking-[-0.035em] text-label sm:text-[80px]"
           >
             <span>Trade</span>
-            <InlineChip
-              gradient="linear-gradient(135deg, var(--blue), #64d2ff)"
-              rotate="-9deg"
-              delay="0s"
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="h-[0.5em] w-[0.5em]">
-                <path d="m5 12.5 4.2 4.2L19 7" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </InlineChip>
+            <InlineTile variant="cargo" rotate="-8deg" delay="0s" />
             <span>compliance,</span>
-            <InlineChip
-              gradient="linear-gradient(135deg, #af52de, #ff375f)"
-              rotate="8deg"
-              delay="0.9s"
-            >
-              <span className="font-mono text-[0.34em] font-semibold text-white">
-                HS
-              </span>
-            </InlineChip>
+            <InlineTile variant="tech" rotate="8deg" delay="0.9s" />
             <span>verified.</span>
           </h1>
 
@@ -132,13 +120,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Closing CTA ── */}
+      {/* ── Closing CTA — blurred grainy gradient backdrop ── */}
       <section className="mx-auto max-w-content px-5 pb-28 sm:px-8">
         <div
           data-reveal
-          className="grain relative overflow-hidden rounded-xl border border-separator bg-surface p-12 text-center"
+          className="grain relative overflow-hidden rounded-xl border border-separator p-12 text-center sm:p-16"
         >
-          <h2 className="text-[32px] font-semibold tracking-tight text-label sm:text-[44px]">
+          {/* blurred colour blobs behind a grain veil */}
+          <div aria-hidden className="absolute inset-0 -z-10">
+            <div
+              className="absolute inset-0"
+              style={{
+                filter: "blur(64px)",
+                background:
+                  "radial-gradient(40% 60% at 20% 30%, color-mix(in srgb, var(--blue) 55%, transparent), transparent 70%), radial-gradient(45% 65% at 80% 40%, color-mix(in srgb, var(--purple) 45%, transparent), transparent 70%), radial-gradient(50% 60% at 55% 90%, color-mix(in srgb, #64d2ff 45%, transparent), transparent 70%)",
+              }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "color-mix(in srgb, var(--bg) 58%, transparent)",
+              }}
+            />
+          </div>
+
+          <h2 className="text-[32px] font-semibold tracking-tight text-label sm:text-[46px]">
             Run a shipment through the chain.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-[16px] text-label-secondary">
@@ -155,19 +161,17 @@ export default function HomePage() {
   );
 }
 
-/** A small squircle badge tile sat inline between headline words (Locus cue).
- *  Rotation on the outer layer, ambient float on the inner, so they don't fight
- *  for `transform`. Sized in `em` so it scales with the headline. */
-function InlineChip({
-  gradient,
+/** An image tile set inline between headline words (Locus cue). Rotation on the
+ *  outer layer, ambient float on the inner, so they don't fight for `transform`.
+ *  Sized in `em` so it scales with the headline. */
+function InlineTile({
+  variant,
   rotate,
   delay,
-  children,
 }: {
-  gradient: string;
+  variant: GoodsVariant;
   rotate: string;
   delay: string;
-  children: React.ReactNode;
 }) {
   return (
     <span
@@ -175,18 +179,35 @@ function InlineChip({
       style={{ transform: `rotate(${rotate})` }}
     >
       <span className="float inline-grid" style={{ animationDelay: delay }}>
-        <span
-          className="grid h-[0.92em] w-[0.92em] place-items-center rounded-[0.26em]"
-          style={{
-            background: gradient,
-            boxShadow:
-              "0 10px 26px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.5)",
-          }}
-        >
-          {children}
-        </span>
+        <GoodsTile
+          variant={variant}
+          className="h-[0.9em] w-[1.2em] rounded-[0.22em] shadow-[0_10px_26px_rgba(0,0,0,0.2)]"
+        />
       </span>
     </span>
+  );
+}
+
+/** A floating image tile scattered around the hero corners. Desktop only. */
+function FloatTile({
+  variant,
+  className,
+  rotate,
+  delay,
+}: {
+  variant: GoodsVariant;
+  className: string;
+  rotate: string;
+  delay: string;
+}) {
+  return (
+    <div className={cn("pointer-events-none absolute hidden lg:block", className)}>
+      <div className="h-full w-full" style={{ transform: `rotate(${rotate})` }}>
+        <div className="float h-full w-full" style={{ animationDelay: delay }}>
+          <GoodsTile variant={variant} className="h-full w-full rounded-[26px] shadow-xl" />
+        </div>
+      </div>
+    </div>
   );
 }
 
