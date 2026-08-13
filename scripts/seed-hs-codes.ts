@@ -40,7 +40,7 @@ async function main() {
   // ── HS docs (RAG) ──
   console.log(`Embedding ${hs.length} HS lines…`);
   const texts = hs.map((h) => `${h.hs_code} ${h.title}. ${h.description}`);
-  const embeddings = await embedBatch(texts);
+  const embeddings = await embedPaced(texts);
 
   console.log("Clearing existing hs_schedule docs…");
   await svc.from("hs_code_docs").delete().eq("source", "hs_schedule");
@@ -77,6 +77,38 @@ async function main() {
 
 function readJson<T = unknown>(path: string): T {
   return JSON.parse(readFileSync(path, "utf-8")) as T;
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Embed in small paced batches with 429 backoff, to fit low free-tier limits. */
+async function embedPaced(texts: string[]): Promise<number[][]> {
+  const out: number[][] = [];
+  const B = 8;
+  for (let i = 0; i < texts.length; i += B) {
+    const chunk = texts.slice(i, i + B);
+    let attempt = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        out.push(...(await embedBatch(chunk)));
+        break;
+      } catch (err) {
+        const msg = String(err);
+        const limited = msg.includes("429") || /rate|quota|resource/i.test(msg);
+        if (limited && attempt < 8) {
+          const wait = Math.min(60000, 20000 + 6000 * attempt);
+          console.warn(`  rate-limited, retrying in ${wait}ms…`);
+          await sleep(wait);
+          attempt++;
+          continue;
+        }
+        throw err;
+      }
+    }
+    if (i + B < texts.length) await sleep(5000);
+  }
+  return out;
 }
 
 function loadEnvLocal() {

@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "db:migrate": "tsx scripts/run-migrations.ts",
     "seed:hs": "tsx scripts/seed-hs-codes.ts",
+    "ingest:hs": "tsx scripts/ingest-hs.ts",
     "eval:classify": "tsx scripts/run-eval.ts"
   },
   "dependencies": {

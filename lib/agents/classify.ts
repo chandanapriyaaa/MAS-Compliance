@@ -31,9 +31,12 @@ export async function runClassify(
   ctx: ClassifyContext,
 ): Promise<ClassificationOutput> {
   const query = buildQuery(ctx);
+  // Retrieve a wide candidate set (real HS schedule is ~6.8k lines) and use a
+  // low sufficiency floor: cosine magnitudes differ by embedder, so the floor
+  // only guards against a totally empty retrieval, not weak-but-present matches.
   const retrieval = await retrieveHsDocs(query, {
-    matchCount: 8,
-    sufficiencyFloor: 0.35,
+    matchCount: 24,
+    sufficiencyFloor: 0.15,
     minSufficient: 1,
   });
 
