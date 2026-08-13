@@ -6,11 +6,10 @@ import { ProductPreview } from "@/components/motion/ProductPreview";
 import { PipelineScrolly } from "@/components/motion/PipelineScrolly";
 import { CountUp } from "@/components/motion/CountUp";
 import { ScrollWordReveal } from "@/components/motion/ScrollWordReveal";
-import FoldTextRaw from "@/components/reactbits/FoldText";
+import { GoodsTile, type GoodsVariant } from "@/components/motion/GoodsTile";
 import ScrollExpandRaw from "@/components/reactbits/ScrollExpand";
 
-// React Bits components are untyped JSX; expose them with permissive props.
-const FoldText = FoldTextRaw as unknown as (props: Record<string, unknown>) => React.JSX.Element;
+// React Bits component is untyped JSX; expose it with permissive props.
 const ScrollExpand = ScrollExpandRaw as unknown as (
   props: Record<string, unknown> & { children?: React.ReactNode },
 ) => React.JSX.Element;
@@ -34,20 +33,25 @@ export default function HomePage() {
         />
 
         <div className="relative mx-auto max-w-content px-5 pb-20 pt-16 text-center sm:px-8 sm:pt-24">
-          <h1 className="mx-auto max-w-4xl text-center">
-            <FoldText
-              text={"Trade compliance,\nverified."}
-              splitBy="char"
-              hinge="top"
-              trigger="mount"
-              duration={0.7}
-              stagger={0.028}
-              perspective={800}
-              creaseShading={0.5}
-              fontSize="clamp(2.6rem, 9vw, 5.2rem)"
-              fontWeight={700}
-              color="var(--label)"
+          <h1
+            data-reveal
+            className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-4 gap-y-3 text-[48px] font-semibold leading-[1.02] tracking-[-0.035em] text-label sm:text-[80px]"
+          >
+            <span>Trade</span>
+            <InlineTile
+              variant="ocean"
+              src="/images/cargo-ship.jpg"
+              rotate="-16deg"
+              delay="0s"
             />
+            <span>compliance,</span>
+            <InlineTile
+              variant="cargo"
+              src="/images/port-crane.jpg"
+              rotate="13deg"
+              delay="0.9s"
+            />
+            <span>verified.</span>
           </h1>
 
           <div
@@ -201,6 +205,36 @@ export default function HomePage() {
 /** An image tile set inline between headline words (Locus cue). Rotation on the
  *  outer layer, ambient float on the inner, so they don't fight for `transform`.
  *  Sized in `em` so it scales with the headline. */
+/** An image tile set inline between headline words, with a quirky tilt.
+ *  Rotation on the outer layer, ambient float on the inner, so they don't
+ *  fight for `transform`. Sized in `em` so it scales with the headline. */
+function InlineTile({
+  variant,
+  src,
+  rotate,
+  delay,
+}: {
+  variant: GoodsVariant;
+  src?: string;
+  rotate: string;
+  delay: string;
+}) {
+  return (
+    <span
+      className="inline-block align-middle"
+      style={{ transform: `rotate(${rotate})` }}
+    >
+      <span className="float inline-grid" style={{ animationDelay: delay }}>
+        <GoodsTile
+          variant={variant}
+          src={src}
+          className="h-[0.92em] w-[1.22em] rounded-[0.22em] shadow-[0_12px_30px_rgba(0,0,0,0.22)]"
+        />
+      </span>
+    </span>
+  );
+}
+
 /** A single count-up stat in the band. */
 function Stat({
   value,
