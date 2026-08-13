@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Nav } from "@/components/Nav";
 
 export const metadata: Metadata = {
   title: "Trade Compliance Copilot",
@@ -7,31 +8,39 @@ export const metadata: Metadata = {
     "Multi-agent HS classification, DGFT scheme cross-check, duty calculation, and compliant documentation for Indian exporters and CHAs.",
 };
 
+// Applied before first paint to avoid a theme flash.
+const noFlash = `(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="color-scheme" content="light dark" />
+        <script dangerouslySetInnerHTML={{ __html: noFlash }} />
+      </head>
       <body>
-        <div className="min-h-screen">
-          <header className="border-b border-slate-200">
-            <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-              <a href="/" className="text-lg font-semibold tracking-tight">
-                Trade Compliance Copilot
-              </a>
-              <nav className="flex gap-4 text-sm text-slate-600">
-                <a href="/dashboard/shipments" className="hover:text-slate-900">
-                  Shipments
-                </a>
-                <a href="/dashboard/review-queue" className="hover:text-slate-900">
-                  Review Queue
-                </a>
-              </nav>
+        <div className="flex min-h-screen flex-col">
+          <Nav />
+          <main className="mx-auto w-full max-w-content flex-1 px-5 py-10 sm:px-8">
+            {children}
+          </main>
+          <footer className="border-t border-separator">
+            <div className="mx-auto flex max-w-content flex-col gap-1 px-5 py-8 sm:px-8">
+              <p className="text-[13px] text-label-secondary">
+                Trade Compliance Copilot — HS classification, DGFT scheme
+                cross-check, duty, and documentation with human-in-the-loop
+                escalation.
+              </p>
+              <p className="text-xs text-label-tertiary">
+                Drafts are machine-generated and must be verified by a licensed
+                customs broker before filing.
+              </p>
             </div>
-          </header>
-          <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+          </footer>
         </div>
       </body>
     </html>

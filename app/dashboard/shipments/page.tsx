@@ -1,17 +1,17 @@
 import { supabaseService } from "@/lib/supabase";
+import { env } from "@/lib/env";
+import type { ShipmentRow } from "@/app/api/shipments/route";
 import { NewShipmentForm } from "@/components/NewShipmentForm";
-import { StatusBadge } from "@/components/StatusBadge";
+import { ShipmentsTable } from "@/components/ShipmentsTable";
+import { SectionHeading } from "@/components/ui/Section";
+import { Card } from "@/components/ui/Card";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/**
- * Shipments dashboard. Lists recent shipments with their live classification
- * status and confidence. Server component reading via the service client.
- */
 export default async function ShipmentsPage() {
   const svc = supabaseService();
-  const { data: shipments, error } = await svc
+  const { data: shipments } = await svc
     .from("shipments")
     .select(
       "id, product_description, classification_status, current_step, origin_country, dest_country, created_at",
@@ -26,68 +26,81 @@ export default async function ShipmentsPage() {
         .select("shipment_id, hs_code, confidence_score, aggregate_confidence")
         .in("shipment_id", ids)
     : { data: [] as any[] };
+  const byShipment = new Map((classifications ?? []).map((c) => [c.shipment_id, c]));
 
-  const byShipment = new Map(
-    (classifications ?? []).map((c) => [c.shipment_id, c]),
-  );
+  const rows: ShipmentRow[] = (shipments ?? []).map((s) => {
+    const c = byShipment.get(s.id);
+    const conf = c?.aggregate_confidence ?? c?.confidence_score ?? null;
+    return {
+      id: s.id,
+      product_description: s.product_description,
+      origin_country: s.origin_country,
+      dest_country: s.dest_country,
+      status: s.classification_status,
+      current_step: s.current_step,
+      hs_code: c?.hs_code ?? null,
+      confidence: conf != null ? Number(conf) : null,
+    created_at: s.created_at,
+    };
+  });
+
+  const total = rows.length;
+  const autoApproved = rows.filter(
+    (r) => r.status === "auto_approved" || r.status === "human_approved",
+  ).length;
+  const needsReview = rows.filter((r) => r.status === "needs_review").length;
+  const inFlight = rows.filter(
+    (r) => r.status === "pending" || r.status === "processing",
+  ).length;
+
+  const threshold = env.confidenceThreshold();
 
   return (
     <div className="space-y-8">
-      <h1 className="text-xl font-semibold tracking-tight">Shipments</h1>
+      <SectionHeading
+        eyebrow="Dashboard"
+        title="Shipments"
+        subtitle="Every shipment runs the full agent chain. Status and confidence update live as each step completes."
+      />
 
-      <NewShipmentForm />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat label="Total" value={total} />
+        <Stat label="Approved" value={autoApproved} tone="green" />
+        <Stat label="Needs review" value={needsReview} tone="amber" />
+        <Stat label="In flight" value={inFlight} tone="blue" />
+      </div>
 
-      {error && (
-        <p className="text-sm text-red-700">
-          Failed to load shipments: {error.message}
-        </p>
-      )}
-
-      <div className="overflow-x-auto rounded-lg border border-slate-200">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-slate-600">
-            <tr>
-              <th className="px-4 py-2 font-medium">Product</th>
-              <th className="px-4 py-2 font-medium">Route</th>
-              <th className="px-4 py-2 font-medium">HS code</th>
-              <th className="px-4 py-2 font-medium">Confidence</th>
-              <th className="px-4 py-2 font-medium">Status</th>
-              <th className="px-4 py-2 font-medium">Step</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(shipments ?? []).map((s) => {
-              const c = byShipment.get(s.id);
-              const conf = c?.aggregate_confidence ?? c?.confidence_score;
-              return (
-                <tr key={s.id} className="border-t border-slate-100">
-                  <td className="max-w-xs truncate px-4 py-2" title={s.product_description}>
-                    {s.product_description}
-                  </td>
-                  <td className="px-4 py-2 text-slate-600">
-                    {(s.origin_country ?? "?") + " → " + (s.dest_country ?? "?")}
-                  </td>
-                  <td className="px-4 py-2 font-mono">{c?.hs_code ?? "—"}</td>
-                  <td className="px-4 py-2">
-                    {conf != null ? Number(conf).toFixed(3) : "—"}
-                  </td>
-                  <td className="px-4 py-2">
-                    <StatusBadge status={s.classification_status} />
-                  </td>
-                  <td className="px-4 py-2 text-slate-500">{s.current_step}</td>
-                </tr>
-              );
-            })}
-            {(!shipments || shipments.length === 0) && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-slate-500">
-                  No shipments yet. Submit one above.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="grid gap-6 lg:grid-cols-[1.85fr_1fr]">
+        <ShipmentsTable initial={rows} threshold={threshold} />
+        <NewShipmentForm />
       </div>
     </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: number;
+  tone?: "neutral" | "green" | "amber" | "blue";
+}) {
+  const color =
+    tone === "green"
+      ? "text-green-ink"
+      : tone === "amber"
+        ? "text-amber-ink"
+        : tone === "blue"
+          ? "text-blue-ink"
+          : "text-label";
+  return (
+    <Card className="p-5">
+      <div className={`text-[30px] font-semibold leading-none ${color}`}>
+        {value}
+      </div>
+      <div className="mt-1.5 text-[13px] text-label-secondary">{label}</div>
+    </Card>
   );
 }

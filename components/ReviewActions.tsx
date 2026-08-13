@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "./ui/Button";
+import { Input } from "./ui/Field";
 
 /**
- * Approve/reject controls for a single review-queue item. On approve the
- * reviewer may correct the HS code before finalizing.
+ * Approve/reject controls for one review-queue item. On approve the reviewer
+ * may correct the HS code before finalizing; approval triggers doc generation.
  */
 export function ReviewActions({ reviewId }: { reviewId: string }) {
   const router = useRouter();
@@ -24,8 +26,7 @@ export function ReviewActions({ reviewId }: { reviewId: string }) {
         body: JSON.stringify({
           action,
           reviewer_notes: notes || undefined,
-          resolved_hs_code:
-            action === "approve" && hsCode ? hsCode : undefined,
+          resolved_hs_code: action === "approve" && hsCode ? hsCode : undefined,
         }),
       });
       const json = await res.json();
@@ -39,38 +40,39 @@ export function ReviewActions({ reviewId }: { reviewId: string }) {
   }
 
   return (
-    <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
-      <div className="flex flex-wrap gap-2">
-        <input
+    <div className="mt-4 space-y-3 border-t border-separator pt-4">
+      <div className="grid gap-2.5 sm:grid-cols-[10rem_1fr]">
+        <Input
           value={hsCode}
           onChange={(e) => setHsCode(e.target.value)}
-          placeholder="Corrected HS code (optional)"
-          className="rounded border border-slate-300 p-1.5 text-sm font-mono"
+          placeholder="Corrected HS"
+          className="font-mono text-[13px]"
         />
-        <input
+        <Input
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Reviewer notes"
-          className="flex-1 rounded border border-slate-300 p-1.5 text-sm"
         />
       </div>
       <div className="flex gap-2">
-        <button
+        <Button
+          size="sm"
           onClick={() => resolve("approve")}
           disabled={pending !== null}
-          className="rounded bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+          className="bg-green"
         >
           {pending === "approve" ? "Approving…" : "Approve"}
-        </button>
-        <button
+        </Button>
+        <Button
+          size="sm"
+          variant="danger"
           onClick={() => resolve("reject")}
           disabled={pending !== null}
-          className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
         >
           {pending === "reject" ? "Rejecting…" : "Reject"}
-        </button>
+        </Button>
       </div>
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && <p className="text-[13px] font-medium text-red-ink">{error}</p>}
     </div>
   );
 }
