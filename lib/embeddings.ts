@@ -21,13 +21,56 @@ export async function embed(text: string): Promise<number[]> {
 export async function embedBatch(texts: string[]): Promise<number[][]> {
   const provider = env.embeddingProvider().toLowerCase();
   if (provider === "openai") return openAiEmbed(texts);
+  if (provider === "gemini" || provider === "google") return geminiEmbed(texts);
   // Dev fallback — deterministic, no network. NOT semantically strong.
   return texts.map(hashingEmbed);
 }
 
 /** True when running on the dev-only hashing embedder. */
 export function isFallbackEmbedder(): boolean {
-  return env.embeddingProvider().toLowerCase() !== "openai";
+  const p = env.embeddingProvider().toLowerCase();
+  return p !== "openai" && p !== "gemini" && p !== "google";
+}
+
+// ── Google Gemini embeddings ───────────────────────────────────
+// Uses gemini-embedding-001 with outputDimensionality=EMBEDDING_DIM. Non-3072
+// outputs are not pre-normalised by the API, so we L2-normalise ourselves.
+async function geminiEmbed(texts: string[]): Promise<number[][]> {
+  const apiKey = env.embeddingApiKey();
+  const model = env.embeddingModel() || "gemini-embedding-001";
+  if (!apiKey) {
+    throw new Error("EMBEDDING_PROVIDER=gemini but EMBEDDING_API_KEY is not set.");
+  }
+  const base = "https://generativelanguage.googleapis.com/v1beta";
+  const url = `${base}/models/${model}:batchEmbedContents`;
+  const body = {
+    requests: texts.map((t) => ({
+      model: `models/${model}`,
+      content: { parts: [{ text: t }] },
+      outputDimensionality: EMBEDDING_DIM,
+    })),
+  };
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-goog-api-key": apiKey,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(`Gemini embeddings error ${res.status}: ${await res.text()}`);
+  }
+  const json = (await res.json()) as { embeddings: { values: number[] }[] };
+  return json.embeddings.map((e) => l2normalize(e.values));
+}
+
+function l2normalize(v: number[]): number[] {
+  let mag = 0;
+  for (const x of v) mag += x * x;
+  mag = Math.sqrt(mag) || 1;
+  return v.map((x) => x / mag);
 }
 
 // ── OpenAI-compatible embeddings ───────────────────────────────

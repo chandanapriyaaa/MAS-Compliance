@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase";
 
 export const runtime = "nodejs";
+// Never cache — this endpoint is polled for live pipeline progress.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 /**
  * GET /api/shipment/[id]/status

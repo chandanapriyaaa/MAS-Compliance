@@ -205,8 +205,8 @@ async function stepEscalate(shipmentId: string) {
     steps.push({
       label: "crosscheck",
       confidence: scheme.confidence,
-      forceReview: scheme.flags.length > 0,
-      reason: scheme.flags.length ? scheme.flags.join("; ") : undefined,
+      forceReview: scheme.requires_review,
+      reason: scheme.requires_review ? scheme.flags.join("; ") : undefined,
     });
   }
   if (duty) {

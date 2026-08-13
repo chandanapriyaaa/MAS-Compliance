@@ -63,10 +63,10 @@ function prefixConfidence(hs: string, prefix: string): number {
   const digits = normalizeHsCode(hs);
   if (!digits) return 0.3;
   const len = prefix.length;
-  if (len >= 8) return 0.95;
-  if (len >= 6) return 0.85;
-  if (len >= 4) return 0.7;
-  return 0.5;
+  if (len >= 8) return 0.97;
+  if (len >= 6) return 0.93;
+  if (len >= 4) return 0.88;
+  return 0.6;
 }
 
 function round2(x: number): number {

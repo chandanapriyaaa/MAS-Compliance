@@ -71,8 +71,9 @@ async function directTrigger(url: string, message: StepMessage): Promise<void> {
 }
 
 function devTriggerSecret(): string {
-  // Not a real secret — dev mode only. Reuses signing key if present.
-  return process.env.QSTASH_CURRENT_SIGNING_KEY ?? "dev";
+  // Not a real secret — dev mode only. Reuses the signing key if present, but
+  // falls back on an empty/unset key (|| not ??) so the header is never blank.
+  return process.env.QSTASH_CURRENT_SIGNING_KEY || "dev-local-trigger";
 }
 
 // ── Inbound signature verification (used by route handlers) ────

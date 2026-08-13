@@ -29,6 +29,7 @@ export async function runCrossCheck(
       advance_auth_eligible: false,
       matched_prefix: null,
       flags,
+      requires_review: true, // missing reference data is a blocking condition
       confidence: 0.2,
       source: null,
     });
@@ -38,20 +39,27 @@ export async function runCrossCheck(
   const hasDrawback = row.drawback_rate != null && row.drawback_rate > 0;
   const eligible = hasRodtep || hasDrawback || row.advance_auth_eligible;
 
-  // Claimed-vs-actual mismatch detection.
+  // Claimed-vs-actual mismatch detection. These are BLOCKING — the exporter is
+  // claiming a benefit the code isn't eligible for.
+  let requiresReview = false;
   const claim = parsed.claimed_scheme;
   if (claim === "rodtep" && !hasRodtep) {
     flags.push("claimed_rodtep_but_ineligible");
+    requiresReview = true;
   }
   if (claim === "drawback" && !hasDrawback) {
     flags.push("claimed_drawback_but_ineligible");
+    requiresReview = true;
   }
   if (claim === "advance_authorization" && !row.advance_auth_eligible) {
     flags.push("claimed_advance_auth_but_ineligible");
+    requiresReview = true;
   }
-  if (hasRodtep && hasDrawback) {
+  // Informational only: most items publish both a RoDTEP and a drawback rate and
+  // the exporter elects one. Note it, but do not force review on its own.
+  if (hasRodtep && hasDrawback && claim === "none") {
     flags.push(
-      "rodtep_and_drawback_both_present: RoDTEP and drawback are generally mutually exclusive on the same shipment — confirm which is claimed",
+      "both_schemes_available: RoDTEP and drawback are both published for this code — elect one (they are generally mutually exclusive)",
     );
   }
 
@@ -65,6 +73,7 @@ export async function runCrossCheck(
     advance_auth_eligible: row.advance_auth_eligible,
     matched_prefix: row.hs_prefix,
     flags,
+    requires_review: requiresReview,
     confidence,
     source: row.source,
   });
@@ -74,9 +83,10 @@ function prefixConfidence(hs: string, prefix: string): number {
   const digits = normalizeHsCode(hs);
   if (!digits) return 0.3;
   const len = prefix.length;
-  // 8-digit line match is strong; chapter-level (2-digit) is weak.
-  if (len >= 8) return 0.95;
-  if (len >= 6) return 0.85;
-  if (len >= 4) return 0.7;
-  return 0.5;
+  // A heading-level (4-digit) scheme rate still applies to the whole heading,
+  // so it is reasonably confident; specificity refines it upward.
+  if (len >= 8) return 0.97;
+  if (len >= 6) return 0.93;
+  if (len >= 4) return 0.88;
+  return 0.6;
 }

@@ -124,6 +124,9 @@ export const CrossCheckOutput = z.object({
   advance_auth_eligible: z.boolean(),
   matched_prefix: z.string().nullable(),
   flags: z.array(z.string()).default([]),
+  // True only for BLOCKING flags (claimed-scheme mismatch, missing data) that
+  // must force human review — not for informational notes.
+  requires_review: z.boolean().default(false),
   confidence: Confidence,
   source: z.string().nullable(),
 });
