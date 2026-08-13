@@ -5,6 +5,7 @@ import type { ShipmentRow } from "@/app/api/shipments/route";
 import { StatusPill } from "./ui/StatusPill";
 import { Meter } from "./ui/Meter";
 import { Card } from "./ui/Card";
+import { ShipmentDrawer } from "./ShipmentDrawer";
 
 const IN_FLIGHT = new Set(["pending", "processing"]);
 
@@ -21,6 +22,7 @@ export function ShipmentsTable({
   threshold: number;
 }) {
   const [rows, setRows] = useState<ShipmentRow[]>(initial);
+  const [selected, setSelected] = useState<string | null>(null);
   const rowsRef = useRef(rows);
   rowsRef.current = rows;
 
@@ -78,7 +80,8 @@ export function ShipmentsTable({
             {rows.map((r) => (
               <tr
                 key={r.id}
-                className="border-b border-separator/60 transition-colors last:border-0 hover:bg-[var(--fill-quaternary)]"
+                onClick={() => setSelected(r.id)}
+                className="cursor-pointer border-b border-separator/60 transition-colors last:border-0 hover:bg-[var(--fill-quaternary)]"
               >
                 <td className="max-w-[22rem] px-5 py-3.5">
                   <div className="truncate font-medium text-label" title={r.product_description}>
@@ -101,13 +104,26 @@ export function ShipmentsTable({
                   <Meter value={r.confidence} threshold={threshold} />
                 </td>
                 <td className="px-5 py-3.5">
-                  <StatusPill status={r.status} pulse={IN_FLIGHT.has(r.status)} />
+                  <div className="flex items-center justify-between gap-2">
+                    <StatusPill status={r.status} pulse={IN_FLIGHT.has(r.status)} />
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="shrink-0 text-label-tertiary"
+                      aria-hidden
+                    >
+                      <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      <ShipmentDrawer id={selected} onClose={() => setSelected(null)} />
     </Card>
   );
 }

@@ -6,6 +6,8 @@ import { ShipmentsTable } from "@/components/ShipmentsTable";
 import { SectionHeading } from "@/components/ui/Section";
 import { Card } from "@/components/ui/Card";
 import { CountUp } from "@/components/motion/CountUp";
+import { Analytics } from "@/components/Analytics";
+import { buildAnalytics } from "@/lib/analytics";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,6 +58,22 @@ export default async function ShipmentsPage() {
 
   const threshold = env.confidenceThreshold();
 
+  // Broader pull for analytics (aggregates over more history than the table).
+  const { data: analyticsShipments } = await svc
+    .from("shipments")
+    .select("classification_status, created_at")
+    .order("created_at", { ascending: false })
+    .limit(500);
+  const { data: analyticsClass } = await svc
+    .from("classifications")
+    .select("hs_code, confidence_score, aggregate_confidence, scheme")
+    .limit(1000);
+  const analytics = buildAnalytics(
+    analyticsShipments ?? [],
+    (analyticsClass ?? []) as any[],
+    new Date(),
+  );
+
   return (
     <div className="space-y-8">
       <SectionHeading
@@ -70,6 +88,8 @@ export default async function ShipmentsPage() {
         <Stat label="Needs review" value={needsReview} tone="amber" />
         <Stat label="In flight" value={inFlight} tone="blue" />
       </div>
+
+      <Analytics data={analytics} />
 
       <div className="grid gap-6 lg:grid-cols-[1.85fr_1fr]">
         <ShipmentsTable initial={rows} threshold={threshold} />
