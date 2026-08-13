@@ -38,6 +38,16 @@ export default function RootLayout({
                 Drafts are machine-generated. Verify with a licensed customs
                 broker before filing.
               </p>
+              <p className="mt-2 text-xs text-label-tertiary">
+                Designed &amp; developed by{" "}
+                <span className="font-medium text-label-secondary">
+                  Korada Chandana Priya
+                </span>
+                . ·{" "}
+                <a href="/docs" className="text-blue hover:underline">
+                  Documentation
+                </a>
+              </p>
             </div>
           </footer>
         </div>

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Multi-agent trade-compliance copilot for Indian exporters/CHAs: HS classification, DGFT scheme cross-check, duty calc, and compliant doc generation with human-in-the-loop escalation.",
+  "author": "Korada Chandana Priya",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
