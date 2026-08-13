@@ -64,7 +64,7 @@ export default function DocsPage() {
           <Section id="principles" title="Design principles">
             <UL>
               <LI><B>Grounded, not generative.</B> Classifications cite retrieved HS-schedule sources; reference rates (scheme, duty) are looked up deterministically, never produced by the model.</LI>
-              <LI><B>Derived confidence.</B> Confidence comes from retrieval strength and cross-sample agreement, not the model's self-report.</LI>
+              <LI><B>Derived confidence.</B> Confidence comes from retrieval strength and cross-sample agreement, not the model&rsquo;s self-report.</LI>
               <LI><B>Human-in-the-loop by default.</B> Low-confidence and scheme-mismatch cases escalate to a review queue; documents are drafted only after finalization.</LI>
               <LI><B>Auditable.</B> Every agent decision is written to an append-only audit log that is searchable org-wide.</LI>
               <LI><B>Asynchronous & serverless-safe.</B> The agent chain is decomposed into independent, signed, retryable steps; no request awaits the full pipeline.</LI>
