@@ -31,20 +31,34 @@ const SCENES: Record<GoodsVariant, string> = {
 
 export function GoodsTile({
   variant,
+  src,
+  alt = "",
   className,
 }: {
   variant: GoodsVariant;
+  /** Optional real photo. Falls back to the gradient scene if absent/broken. */
+  src?: string;
+  alt?: string;
   className?: string;
 }) {
   return (
     <span
-      aria-hidden
+      aria-hidden={alt === ""}
       className={cn(
         "grain relative block overflow-hidden ring-1 ring-black/5",
         className,
       )}
       style={{ backgroundImage: SCENES[variant] }}
     >
+      {src && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={alt}
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+        />
+      )}
       {/* top sheen — the light hitting a glossy print */}
       <span
         className="absolute inset-0"

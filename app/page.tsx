@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { cn } from "@/components/ui/cn";
 import { ScrollFX } from "@/components/motion/ScrollFX";
 import { GoodsTile, type GoodsVariant } from "@/components/motion/GoodsTile";
 import { ProductPreview } from "@/components/motion/ProductPreview";
@@ -27,21 +26,25 @@ export default function HomePage() {
           }}
         />
 
-        {/* scattered floating photo tiles */}
-        <FloatTile variant="textile" className="left-[3%] top-[26%] h-28 w-28" rotate="-11deg" delay="0s" />
-        <FloatTile variant="spice" className="left-[9%] top-[64%] h-24 w-24" rotate="7deg" delay="1.1s" />
-        <FloatTile variant="ocean" className="right-[4%] top-[20%] h-28 w-28" rotate="9deg" delay="0.5s" />
-        <FloatTile variant="agri" className="right-[6%] top-[62%] h-32 w-32" rotate="-8deg" delay="1.5s" />
-
         <div className="relative mx-auto max-w-content px-5 pb-20 pt-16 text-center sm:px-8 sm:pt-24">
           <h1
             data-reveal
             className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-4 gap-y-3 text-[48px] font-semibold leading-[1.02] tracking-[-0.035em] text-label sm:text-[80px]"
           >
             <span>Trade</span>
-            <InlineTile variant="cargo" rotate="-8deg" delay="0s" />
+            <InlineTile
+              variant="ocean"
+              src="/images/cargo-ship.jpg"
+              rotate="-8deg"
+              delay="0s"
+            />
             <span>compliance,</span>
-            <InlineTile variant="tech" rotate="8deg" delay="0.9s" />
+            <InlineTile
+              variant="cargo"
+              src="/images/port-crane.jpg"
+              rotate="8deg"
+              delay="0.9s"
+            />
             <span>verified.</span>
           </h1>
 
@@ -166,10 +169,12 @@ export default function HomePage() {
  *  Sized in `em` so it scales with the headline. */
 function InlineTile({
   variant,
+  src,
   rotate,
   delay,
 }: {
   variant: GoodsVariant;
+  src?: string;
   rotate: string;
   delay: string;
 }) {
@@ -181,33 +186,11 @@ function InlineTile({
       <span className="float inline-grid" style={{ animationDelay: delay }}>
         <GoodsTile
           variant={variant}
+          src={src}
           className="h-[0.9em] w-[1.2em] rounded-[0.22em] shadow-[0_10px_26px_rgba(0,0,0,0.2)]"
         />
       </span>
     </span>
-  );
-}
-
-/** A floating image tile scattered around the hero corners. Desktop only. */
-function FloatTile({
-  variant,
-  className,
-  rotate,
-  delay,
-}: {
-  variant: GoodsVariant;
-  className: string;
-  rotate: string;
-  delay: string;
-}) {
-  return (
-    <div className={cn("pointer-events-none absolute hidden lg:block", className)}>
-      <div className="h-full w-full" style={{ transform: `rotate(${rotate})` }}>
-        <div className="float h-full w-full" style={{ animationDelay: delay }}>
-          <GoodsTile variant={variant} className="h-full w-full rounded-[26px] shadow-xl" />
-        </div>
-      </div>
-    </div>
   );
 }
 
