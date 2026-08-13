@@ -34,6 +34,46 @@ interface Payload {
 
 const IN_FLIGHT = new Set(["pending", "processing"]);
 
+/** Build a one-row CSV of the finalized classification and download it. */
+function exportCsv(data: Payload) {
+  const s = data.shipment;
+  const c = data.classification;
+  const sc = c?.scheme ?? {};
+  const dt = c?.duty ?? {};
+  const cols: [string, string | number | null][] = [
+    ["shipment_id", s.id],
+    ["product", s.product_description],
+    ["origin", s.origin_country],
+    ["destination", s.dest_country],
+    ["status", s.classification_status],
+    ["hs_code", c?.hs_code ?? ""],
+    ["confidence", c?.confidence_score ?? ""],
+    ["aggregate_confidence", c?.aggregate_confidence ?? ""],
+    ["scheme_eligible", sc.scheme_eligible ?? ""],
+    ["rodtep_rate", sc.rodtep_rate ?? ""],
+    ["drawback_rate", sc.drawback_rate ?? ""],
+    ["duty_amount", dt.duty_amount ?? ""],
+    ["currency", dt.currency ?? ""],
+    ["flags", (sc.flags ?? []).join("; ")],
+    ["documents", c?.documents?.documents?.length ?? 0],
+    ["is_final", c?.is_final ?? false],
+    ["created_at", s.created_at],
+  ];
+  const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const csv =
+    cols.map(([k]) => esc(k)).join(",") +
+    "\n" +
+    cols.map(([, v]) => esc(v)).join(",") +
+    "\n";
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `classification-${s.id.slice(0, 8)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function ShipmentDrawer({
   id,
   onClose,
@@ -96,32 +136,43 @@ export function ShipmentDrawer({
       />
       {/* panel */}
       <aside
-        className="absolute right-0 top-0 flex h-full w-full max-w-xl flex-col border-l border-separator bg-canvas shadow-lg"
+        className="absolute right-0 top-0 flex h-full w-full max-w-2xl flex-col overflow-hidden border-l border-separator bg-canvas shadow-lg"
         style={{ animation: "slideIn 0.3s var(--spring-smooth) both" }}
       >
         <style>{`@keyframes slideIn{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}`}</style>
 
         {/* header */}
-        <div className="border-b border-separator p-5">
+        <div className="shrink-0 border-b border-separator p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="truncate text-[15px] font-semibold text-label">
+              <div className="truncate text-[16px] font-semibold text-label">
                 {s?.product_description ?? "Loading…"}
               </div>
-              <div className="mt-0.5 text-[12px] text-label-tertiary">
+              <div className="mt-0.5 truncate text-[12px] text-label-tertiary">
                 {(s?.origin_country ?? "?") + " → " + (s?.dest_country ?? "?")}
                 {s ? ` · ${s.id.slice(0, 8)}` : ""}
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-label-secondary hover:bg-[var(--fill-quaternary)]"
-              aria-label="Close"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
-            </button>
+            <div className="flex shrink-0 items-center gap-1">
+              {data && (
+                <button
+                  onClick={() => exportCsv(data)}
+                  className="rounded-full border border-separator px-3 py-1.5 text-[12px] font-medium text-label-secondary transition hover:bg-[var(--fill-quaternary)] hover:text-label"
+                  title="Export classification as CSV"
+                >
+                  Export CSV
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="grid h-8 w-8 place-items-center rounded-full text-label-secondary transition hover:bg-[var(--fill-quaternary)]"
+                aria-label="Close"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -156,7 +207,7 @@ export function ShipmentDrawer({
         </div>
 
         {/* body */}
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           {!data ? (
             <div className="p-6 text-[13px] text-label-tertiary">Loading trail…</div>
           ) : tab === "workflow" ? (

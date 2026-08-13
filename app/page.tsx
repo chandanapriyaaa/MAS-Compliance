@@ -2,11 +2,18 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ScrollFX } from "@/components/motion/ScrollFX";
-import { GoodsTile, type GoodsVariant } from "@/components/motion/GoodsTile";
 import { ProductPreview } from "@/components/motion/ProductPreview";
 import { PipelineScrolly } from "@/components/motion/PipelineScrolly";
 import { CountUp } from "@/components/motion/CountUp";
 import { ScrollWordReveal } from "@/components/motion/ScrollWordReveal";
+import FoldTextRaw from "@/components/reactbits/FoldText";
+import ScrollExpandRaw from "@/components/reactbits/ScrollExpand";
+
+// React Bits components are untyped JSX; expose them with permissive props.
+const FoldText = FoldTextRaw as unknown as (props: Record<string, unknown>) => React.JSX.Element;
+const ScrollExpand = ScrollExpandRaw as unknown as (
+  props: Record<string, unknown> & { children?: React.ReactNode },
+) => React.JSX.Element;
 
 export default function HomePage() {
   return (
@@ -27,25 +34,20 @@ export default function HomePage() {
         />
 
         <div className="relative mx-auto max-w-content px-5 pb-20 pt-16 text-center sm:px-8 sm:pt-24">
-          <h1
-            data-reveal
-            className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-4 gap-y-3 text-[48px] font-semibold leading-[1.02] tracking-[-0.035em] text-label sm:text-[80px]"
-          >
-            <span>Trade</span>
-            <InlineTile
-              variant="ocean"
-              src="/images/cargo-ship.jpg"
-              rotate="-8deg"
-              delay="0s"
+          <h1 className="mx-auto max-w-4xl text-center">
+            <FoldText
+              text={"Trade compliance,\nverified."}
+              splitBy="char"
+              hinge="top"
+              trigger="mount"
+              duration={0.7}
+              stagger={0.028}
+              perspective={800}
+              creaseShading={0.5}
+              fontSize="clamp(2.6rem, 9vw, 5.2rem)"
+              fontWeight={700}
+              color="var(--label)"
             />
-            <span>compliance,</span>
-            <InlineTile
-              variant="cargo"
-              src="/images/port-crane.jpg"
-              rotate="8deg"
-              delay="0.9s"
-            />
-            <span>verified.</span>
           </h1>
 
           <div
@@ -91,6 +93,38 @@ export default function HomePage() {
           text="Most classifiers hand you a code. This one hands you evidence: sources it can cite, confidence it can defend, and a human in the loop the moment it cannot."
           className="max-w-4xl text-[30px] font-semibold leading-[1.25] tracking-[-0.02em] sm:text-[44px]"
         />
+      </section>
+
+      {/* ── Cinematic expanding cargo scene (React Bits ScrollExpand) ── */}
+      <section className="bleed my-8">
+        <ScrollExpand
+          src="/images/cargo-ship.jpg"
+          alt="Container ship leaving port"
+          title="One wrong code. Real consequence."
+          scrollHint="Scroll to open"
+          mediaZoom={1.3}
+          overlayScrim={0.5}
+          scrollDistance={1.1}
+          holdDistance={0.3}
+          useWindowScroll
+        >
+          <div className="mx-auto max-w-2xl">
+            <h2
+              className="text-[26px] font-semibold leading-tight sm:text-[40px]"
+              style={{ color: "#fff", letterSpacing: "-0.02em" }}
+            >
+              Misclassification means seized cargo, clawed-back incentives, penalties.
+            </h2>
+            <p
+              className="mx-auto mt-4 max-w-lg text-[15px] leading-relaxed sm:text-[17px]"
+              style={{ color: "rgba(255,255,255,0.82)" }}
+            >
+              This copilot refuses to guess. Every code is grounded in retrieved
+              sources, scored on real signals, and escalated the moment the
+              evidence runs thin.
+            </p>
+          </div>
+        </ScrollExpand>
       </section>
 
       {/* ── Signature scrolly: the pipeline ── */}
@@ -167,33 +201,6 @@ export default function HomePage() {
 /** An image tile set inline between headline words (Locus cue). Rotation on the
  *  outer layer, ambient float on the inner, so they don't fight for `transform`.
  *  Sized in `em` so it scales with the headline. */
-function InlineTile({
-  variant,
-  src,
-  rotate,
-  delay,
-}: {
-  variant: GoodsVariant;
-  src?: string;
-  rotate: string;
-  delay: string;
-}) {
-  return (
-    <span
-      className="inline-block align-middle"
-      style={{ transform: `rotate(${rotate})` }}
-    >
-      <span className="float inline-grid" style={{ animationDelay: delay }}>
-        <GoodsTile
-          variant={variant}
-          src={src}
-          className="h-[0.9em] w-[1.2em] rounded-[0.22em] shadow-[0_10px_26px_rgba(0,0,0,0.2)]"
-        />
-      </span>
-    </span>
-  );
-}
-
 /** A single count-up stat in the band. */
 function Stat({
   value,

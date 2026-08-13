@@ -8,7 +8,8 @@ import { cn } from "./ui/cn";
 
 const LINKS = [
   { href: "/dashboard/shipments", label: "Shipments" },
-  { href: "/dashboard/review-queue", label: "Review Queue" },
+  { href: "/dashboard/review-queue", label: "Review" },
+  { href: "/dashboard/audit", label: "Audit" },
 ];
 
 /** Floating rounded Liquid-Glass capsule nav — chrome that defers to content. */
