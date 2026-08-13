@@ -81,8 +81,8 @@ export function Donut({
                   transition: "opacity 0.15s, stroke-width 0.15s",
                   cursor: "pointer",
                 }}
-                onMouseEnter={() => setHover(i)}
-                onMouseLeave={() => setHover(null)}
+                onPointerEnter={() => setHover(i)}
+                onPointerLeave={() => setHover(null)}
               />
             );
             offset += len;
@@ -111,8 +111,8 @@ export function Donut({
                 "flex cursor-default items-center gap-2 rounded px-1 py-0.5 text-[13px] transition-colors",
                 hover === i && "bg-[var(--fill-quaternary)]",
               )}
-              onMouseEnter={() => setHover(i)}
-              onMouseLeave={() => setHover(null)}
+              onPointerEnter={() => setHover(i)}
+              onPointerLeave={() => setHover(null)}
             >
               <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: s.color }} />
               <span className="text-label-secondary">{s.label}</span>
@@ -148,8 +148,8 @@ export function Bars({
             <div
               key={d.label}
               className="flex flex-1 cursor-pointer flex-col items-center justify-end gap-1"
-              onMouseEnter={() => setHover(i)}
-              onMouseLeave={() => setHover(null)}
+              onPointerEnter={() => setHover(i)}
+              onPointerLeave={() => setHover(null)}
             >
               <span className="text-[10px] tabular-nums text-label-tertiary">{d.value || ""}</span>
               <div
@@ -222,8 +222,8 @@ export function AreaSpark({
               width={stepX}
               height={height}
               fill="transparent"
-              onMouseEnter={() => setHover(i)}
-              onMouseLeave={() => setHover(null)}
+              onPointerEnter={() => setHover(i)}
+              onPointerLeave={() => setHover(null)}
             />
           </g>
         ))}
@@ -296,8 +296,8 @@ export function Radar({ axes, size = 260 }: { axes: RadarAxis[]; size?: number }
                 r="12"
                 fill="transparent"
                 style={{ cursor: "pointer" }}
-                onMouseEnter={() => setHover(i)}
-                onMouseLeave={() => setHover(null)}
+                onPointerEnter={() => setHover(i)}
+                onPointerLeave={() => setHover(null)}
               />
             </g>
           );
@@ -314,8 +314,8 @@ export function Radar({ axes, size = 260 }: { axes: RadarAxis[]; size?: number }
               dominantBaseline="middle"
               className={cn("text-[10px]", hover === i ? "fill-[var(--label)]" : "fill-[var(--label-secondary)]")}
               style={{ cursor: "pointer" }}
-              onMouseEnter={() => setHover(i)}
-              onMouseLeave={() => setHover(null)}
+              onPointerEnter={() => setHover(i)}
+              onPointerLeave={() => setHover(null)}
             >
               {a.label}
               {a.display ? ` ${a.display}` : ""}
@@ -350,8 +350,8 @@ export function HBars({
         <li
           key={d.label}
           className="cursor-default space-y-1 rounded-md px-1 py-0.5 transition-colors hover:bg-[var(--fill-quaternary)]"
-          onMouseEnter={() => setHover(i)}
-          onMouseLeave={() => setHover(null)}
+          onPointerEnter={() => setHover(i)}
+          onPointerLeave={() => setHover(null)}
         >
           <div className="flex items-baseline justify-between text-[13px]">
             <span className="font-mono text-label">{d.label}</span>

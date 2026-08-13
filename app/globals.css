@@ -290,15 +290,21 @@
   .enter-stagger > *:nth-child(7) { animation-delay: 0.38s; }
   .enter-stagger > *:nth-child(8) { animation-delay: 0.44s; }
 
-  /* Hover lift micro-interaction */
+  /* Hover lift micro-interaction — only where hover is real (not touch) */
   .lift {
     transition:
       transform var(--dur) var(--ease-spring),
       box-shadow var(--dur) var(--ease-spring);
   }
-  .lift:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
+  @media (hover: hover) and (pointer: fine) {
+    .lift:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+  /* Touch feedback substitute: a gentle press instead of a stuck hover */
+  .lift:active {
+    transform: scale(0.995);
   }
   .press {
     transition: transform var(--dur-fast) var(--ease-spring);

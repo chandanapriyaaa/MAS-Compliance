@@ -6,6 +6,9 @@ import type { Config } from "tailwindcss";
  * hex — so light/dark/contrast adapt automatically.
  */
 const config: Config = {
+  // Only apply `hover:` utilities on devices that actually support hover, so a
+  // first tap on touch screens doesn't get stuck in a hover state.
+  future: { hoverOnlyWhenSupported: true },
   darkMode: ["class", '[data-theme="dark"]'],
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",

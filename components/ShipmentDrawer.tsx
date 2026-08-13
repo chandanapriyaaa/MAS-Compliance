@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { LogEntry } from "@/app/api/shipment/[id]/logs/route";
 import { StatusPill } from "./ui/StatusPill";
 import { Meter } from "./ui/Meter";
@@ -74,6 +74,156 @@ function exportCsv(data: Payload) {
   URL.revokeObjectURL(url);
 }
 
+/**
+ * Open a brutalist-minimal one-page analytics report in a print window; the
+ * user saves it as PDF. Self-contained HTML + inline CSS (A4, muted palette,
+ * mono data, thin rules).
+ */
+function generateReport(data: Payload) {
+  const s = data.shipment;
+  const c = data.classification;
+  const sc = (c?.scheme ?? {}) as Record<string, any>;
+  const dt = (c?.duty ?? {}) as Record<string, any>;
+  const sources = (c?.retrieved_sources ?? []) as any[];
+  const logs = data.logs ?? [];
+  const esc = (v: unknown) =>
+    String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const pct = (v: any) => (v == null ? "—" : `${(Number(v) * 100).toFixed(1)}%`);
+  const num = (v: any) => (v == null ? "—" : Number(v).toFixed(3));
+  const money = (v: any) =>
+    v == null ? "—" : `${dt.currency ?? "INR"} ${Number(v).toLocaleString()}`;
+  const decision =
+    s.classification_status === "auto_approved" || s.classification_status === "human_approved"
+      ? "APPROVED"
+      : s.classification_status === "needs_review"
+        ? "NEEDS REVIEW"
+        : s.classification_status.toUpperCase();
+  const agg = c?.aggregate_confidence ?? c?.confidence_score;
+
+  const bar = (label: string, v: any) => {
+    const w = v == null ? 0 : Math.round(Math.max(0, Math.min(1, Number(v))) * 100);
+    return `<div class="bar"><div class="bl"><span>${label}</span><b>${num(v)}</b></div>
+      <div class="track"><i style="width:${w}%"></i></div></div>`;
+  };
+
+  const dutyRows = (dt.breakdown ?? [])
+    .map(
+      (b: any) =>
+        `<tr><td>${esc(b.label)}</td><td class="r">${pct(b.rate)}</td><td class="r">${money(b.amount)}</td></tr>`,
+    )
+    .join("");
+
+  const srcRows = sources
+    .slice(0, 6)
+    .map(
+      (x: any) =>
+        `<tr><td class="mono">${esc(x.hs_code ?? "—")}</td><td>${esc(x.title ?? x.snippet ?? x.source)}</td><td class="r mono">${x.similarity != null ? Number(x.similarity).toFixed(2) : "—"}</td></tr>`,
+    )
+    .join("");
+
+  const timeline = logs
+    .map((l) => {
+      const t = new Date(l.created_at).toLocaleTimeString();
+      return `<div class="tl"><span class="mono">${esc(t)}</span><span class="tstep">${esc(l.step)}</span><span>${esc(l.event.replace(/_/g, " "))}</span></div>`;
+    })
+    .join("");
+
+  const flags = (sc.flags ?? []) as string[];
+  const generated = new Date().toLocaleString();
+
+  const win = window.open("", "_blank", "width=880,height=1100");
+  if (!win) return;
+  win.document.write(`<!doctype html><html><head><meta charset="utf-8">
+<title>Shipment analysis — ${esc(s.id.slice(0, 8))}</title>
+<style>
+  :root{--ink:#111;--mut:#6b6b6b;--line:#111;--soft:#e7e5e1;--acc:#0a58ff;--bg:#faf9f6}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .page{max-width:760px;margin:0 auto;padding:40px 44px}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+  .ey{font:600 11px/1 ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+  h1{font-size:30px;letter-spacing:-.02em;margin:6px 0 2px}
+  .sub{color:var(--mut);font-size:12px}
+  .rule{border:0;border-top:2px solid var(--line);margin:18px 0}
+  .thin{border:0;border-top:1px solid var(--soft);margin:14px 0}
+  .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:22px}
+  .verdict{border:2px solid var(--line);padding:16px 18px}
+  .verdict .d{font:800 22px/1 -apple-system,sans-serif;letter-spacing:-.01em}
+  .big{font:800 46px/1 -apple-system,sans-serif;letter-spacing:-.02em}
+  .kv{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--soft);font-size:12px}
+  .kv b{font-weight:600}
+  .sec{margin-top:22px}
+  .sec h2{font:700 12px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
+  .bar{margin:7px 0}
+  .bl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+  .track{height:8px;background:var(--soft);border:1px solid #d9d7d2}
+  .track i{display:block;height:100%;background:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--soft)}
+  th{font:600 10px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+  td.r,th.r{text-align:right}
+  .tl{display:grid;grid-template-columns:78px 92px 1fr;gap:8px;font-size:11px;padding:3px 0;border-bottom:1px dotted var(--soft)}
+  .tstep{color:var(--acc);font-weight:600}
+  .chips span{display:inline-block;border:1px solid var(--line);padding:2px 7px;margin:0 5px 5px 0;font:11px/1.3 ui-monospace,monospace}
+  .foot{margin-top:26px;padding-top:12px;border-top:2px solid var(--line);font-size:10.5px;color:var(--mut)}
+  @media print{body{background:#fff}.page{padding:24px}@page{margin:14mm}}
+</style></head><body><div class="page">
+  <div class="ey">Shipment Analysis · Trade Compliance Copilot</div>
+  <h1>${esc(s.product_description)}</h1>
+  <div class="sub">HS <span class="mono">${esc(c?.hs_code ?? "n/a")}</span> · ${esc(s.origin_country ?? "?")} → ${esc(s.dest_country ?? "?")} · <span class="mono">${esc(s.id)}</span></div>
+  <hr class="rule"/>
+
+  <div class="grid">
+    <div class="verdict">
+      <div class="ey">Decision</div>
+      <div class="d">${decision}</div>
+      <div style="margin-top:10px" class="ey">Aggregate confidence</div>
+      <div class="big" style="color:${agg != null && Number(agg) >= 0.85 ? "#127a3d" : "#b25e00"}">${num(agg)}</div>
+      <div class="sub">threshold 0.85</div>
+    </div>
+    <div>
+      <div class="kv"><span>HS classification</span><b class="mono">${num(c?.confidence_score)}</b></div>
+      <div class="kv"><span>Scheme eligible</span><b>${sc.scheme_eligible ? "Yes" : "No"}</b></div>
+      <div class="kv"><span>RoDTEP</span><b class="mono">${pct(sc.rodtep_rate)}</b></div>
+      <div class="kv"><span>Drawback</span><b class="mono">${pct(sc.drawback_rate)}</b></div>
+      <div class="kv"><span>Duty payable</span><b class="mono">${money(dt.duty_amount)}</b></div>
+      <div class="kv"><span>Documents</span><b>${c?.documents?.documents?.length ?? 0}</b></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Confidence signals</h2>
+    ${bar("HS classification", c?.confidence_score)}
+    ${bar("Scheme cross-check", sc.confidence)}
+    ${bar("Duty computation", dt.confidence)}
+  </div>
+
+  ${
+    dutyRows
+      ? `<div class="sec"><h2>Duty breakdown</h2><table><thead><tr><th>Component</th><th class="r">Rate</th><th class="r">Amount</th></tr></thead><tbody>${dutyRows}<tr><td><b>Total</b></td><td class="r mono">${pct(dt.duty_rate)}</td><td class="r mono"><b>${money(dt.duty_amount)}</b></td></tr></tbody></table></div>`
+      : ""
+  }
+
+  ${
+    srcRows
+      ? `<div class="sec"><h2>Cited sources — ${sources.length} retrieved</h2><table><thead><tr><th>HS</th><th>Source</th><th class="r">Sim</th></tr></thead><tbody>${srcRows}</tbody></table></div>`
+      : ""
+  }
+
+  ${flags.length ? `<div class="sec"><h2>Flags</h2><div class="chips">${flags.map((f) => `<span>${esc(f.split(":")[0])}</span>`).join("")}</div></div>` : ""}
+
+  <div class="sec"><h2>Pipeline timeline</h2>${timeline || '<div class="sub">No events.</div>'}</div>
+
+  <div class="foot">
+    Machine-generated draft analysis. Verify HS code, scheme eligibility, and duty against current DGFT/CBIC notifications before filing.<br/>
+    Generated ${esc(generated)} · Trade Compliance Copilot · Designed &amp; developed by Korada Chandana Priya
+  </div>
+</div></body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 350);
+}
+
 export function ShipmentDrawer({
   id,
   onClose,
@@ -119,6 +269,48 @@ export function ShipmentDrawer({
     return () => window.removeEventListener("keydown", onKey);
   }, [id, onClose]);
 
+  // ── draggable floating window ──
+  const winRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const dragRef = useRef<{ mx: number; my: number; x: number; y: number } | null>(null);
+
+  useLayoutEffect(() => {
+    if (!id) {
+      setPos(null);
+      return;
+    }
+    const w = Math.min(window.innerWidth * 0.94, 600);
+    setPos({
+      x: Math.max(12, (window.innerWidth - w) / 2),
+      y: Math.max(78, Math.round(window.innerHeight * 0.08)),
+    });
+  }, [id]);
+
+  function onDragDown(e: React.PointerEvent) {
+    if (!pos) return;
+    if ((e.target as HTMLElement).closest("button, a, input")) return;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    dragRef.current = { mx: e.clientX, my: e.clientY, x: pos.x, y: pos.y };
+  }
+  function onDragMove(e: React.PointerEvent) {
+    if (!dragRef.current) return;
+    const el = winRef.current;
+    const w = el?.offsetWidth ?? 560;
+    let x = dragRef.current.x + (e.clientX - dragRef.current.mx);
+    let y = dragRef.current.y + (e.clientY - dragRef.current.my);
+    x = Math.min(Math.max(-w + 120, x), window.innerWidth - 120);
+    y = Math.min(Math.max(8, y), window.innerHeight - 52);
+    setPos({ x, y });
+  }
+  function onDragUp(e: React.PointerEvent) {
+    dragRef.current = null;
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  }
+
   if (!id) return null;
 
   const s = data?.shipment;
@@ -127,22 +319,28 @@ export function ShipmentDrawer({
   const hasError = (data?.logs ?? []).some((l) => l.level === "error");
 
   return (
-    <div className="fixed inset-0 z-[70]">
-      {/* backdrop */}
-      <button
-        aria-label="Close"
-        onClick={onClose}
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-      />
-      {/* panel */}
+    <div className="pointer-events-none fixed inset-0 z-[70]">
+      {/* draggable floating window — overlays the dashboard, movable anywhere */}
       <aside
-        className="absolute right-0 top-0 flex h-full w-full max-w-2xl flex-col overflow-hidden border-l border-separator bg-canvas shadow-lg"
-        style={{ animation: "slideIn 0.3s var(--spring-smooth) both" }}
+        ref={winRef}
+        className="pointer-events-auto absolute flex max-h-[84vh] w-[min(94vw,600px)] flex-col overflow-hidden rounded-2xl border border-separator bg-canvas shadow-lg"
+        style={{
+          left: pos ? pos.x : "50%",
+          top: pos ? pos.y : 80,
+          transform: pos ? undefined : "translateX(-50%)",
+          animation: "popIn 0.24s var(--spring-smooth) both",
+        }}
       >
-        <style>{`@keyframes slideIn{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}`}</style>
+        <style>{`@keyframes popIn{from{transform:translateY(8px) scale(0.985);opacity:0}to{opacity:1}}`}</style>
 
-        {/* header */}
-        <div className="shrink-0 border-b border-separator p-5">
+        {/* header = drag handle */}
+        <div
+          onPointerDown={onDragDown}
+          onPointerMove={onDragMove}
+          onPointerUp={onDragUp}
+          className="shrink-0 cursor-move touch-none select-none border-b border-separator p-5 pt-3"
+        >
+          <div className="mx-auto mb-2.5 h-1 w-9 rounded-full bg-[var(--fill)]" title="Drag to move" />
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="truncate text-[16px] font-semibold text-label">
@@ -155,13 +353,22 @@ export function ShipmentDrawer({
             </div>
             <div className="flex shrink-0 items-center gap-1">
               {data && (
-                <button
-                  onClick={() => exportCsv(data)}
-                  className="rounded-full border border-separator px-3 py-1.5 text-[12px] font-medium text-label-secondary transition hover:bg-[var(--fill-quaternary)] hover:text-label"
-                  title="Export classification as CSV"
-                >
-                  Export CSV
-                </button>
+                <>
+                  <button
+                    onClick={() => generateReport(data)}
+                    className="rounded-full bg-blue px-3 py-1.5 text-[12px] font-medium text-white transition hover:brightness-110"
+                    title="Open a one-page analytics report (print or save as PDF)"
+                  >
+                    Report
+                  </button>
+                  <button
+                    onClick={() => exportCsv(data)}
+                    className="hidden rounded-full border border-separator px-3 py-1.5 text-[12px] font-medium text-label-secondary transition hover:bg-[var(--fill-quaternary)] hover:text-label sm:block"
+                    title="Export classification as CSV"
+                  >
+                    CSV
+                  </button>
+                </>
               )}
               <button
                 onClick={onClose}
