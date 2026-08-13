@@ -31,6 +31,22 @@
     { "id": "e27", "product_description": "Roasted and salted cashew nuts in vacuum packs", "origin_country": "India", "dest_country": "United Kingdom", "expected_prefix": "2008" },
     { "id": "e28", "product_description": "Toilet soap bars, medicated, for personal use", "origin_country": "India", "dest_country": "Kenya", "expected_prefix": "3401" },
     { "id": "e29", "product_description": "Petrol engine, 1197cc, reciprocating piston, for a car", "origin_country": "India", "dest_country": "Mexico", "expected_prefix": "8407" },
-    { "id": "e30", "product_description": "Iron pipe elbow fitting, threaded, non-cast", "origin_country": "India", "dest_country": "Qatar", "expected_prefix": "7307" }
+    { "id": "e30", "product_description": "Iron pipe elbow fitting, threaded, non-cast", "origin_country": "India", "dest_country": "Qatar", "expected_prefix": "7307" },
+    { "id": "e31", "product_description": "Green Arabica coffee beans, not roasted, not decaffeinated", "origin_country": "India", "dest_country": "Italy", "expected_prefix": "0901" },
+    { "id": "e32", "product_description": "Dried red chillies, whole, not crushed or ground", "origin_country": "India", "dest_country": "Sri Lanka", "expected_prefix": "0904" },
+    { "id": "e33", "product_description": "Turmeric fingers, dried, whole rhizome", "origin_country": "India", "dest_country": "United States", "expected_prefix": "0910" },
+    { "id": "e34", "product_description": "Unmanufactured flue-cured tobacco leaf, not stemmed", "origin_country": "India", "dest_country": "Belgium", "expected_prefix": "2401" },
+    { "id": "e35", "product_description": "Rough marble blocks, crude, just quarried", "origin_country": "India", "dest_country": "China", "expected_prefix": "2515" },
+    { "id": "e36", "product_description": "Mono ethylene glycol (MEG), industrial grade", "origin_country": "India", "dest_country": "Turkey", "expected_prefix": "2905" },
+    { "id": "e37", "product_description": "Insecticide spray, packed for retail sale", "origin_country": "India", "dest_country": "Kenya", "expected_prefix": "3808" },
+    { "id": "e38", "product_description": "Disposable nitrile examination gloves, non-surgical", "origin_country": "India", "dest_country": "United States", "expected_prefix": "4015" },
+    { "id": "e39", "product_description": "Corrugated cardboard shipping boxes, flat-packed", "origin_country": "India", "dest_country": "United Arab Emirates", "expected_prefix": "4819" },
+    { "id": "e40", "product_description": "Woven mulberry silk fabric, 90% silk by weight", "origin_country": "India", "dest_country": "France", "expected_prefix": "5007" },
+    { "id": "e41", "product_description": "Men's woven cotton formal shirt, long sleeve", "origin_country": "India", "dest_country": "Germany", "expected_prefix": "6205" },
+    { "id": "e42", "product_description": "Polished granite kitchen countertop slab", "origin_country": "India", "dest_country": "United States", "expected_prefix": "6802" },
+    { "id": "e43", "product_description": "White porcelain dinner plates, tableware set", "origin_country": "India", "dest_country": "United Kingdom", "expected_prefix": "6911" },
+    { "id": "e44", "product_description": "Stainless steel cooking pot, household kitchenware", "origin_country": "India", "dest_country": "Australia", "expected_prefix": "7323" },
+    { "id": "e45", "product_description": "Rechargeable lithium-ion battery pack, 5000mAh", "origin_country": "China", "dest_country": "India", "expected_prefix": "8507" },
+    { "id": "e46", "product_description": "LED panel light fixture for ceilings", "origin_country": "India", "dest_country": "Nepal", "expected_prefix": "9405" }
   ]
 }

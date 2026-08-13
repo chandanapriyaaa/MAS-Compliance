@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { LogEntry } from "@/app/api/shipment/[id]/logs/route";
 import { StatusPill } from "./ui/StatusPill";
 import { Meter } from "./ui/Meter";
 import { AgentFlow } from "./AgentFlow";
+import { useRealtime } from "@/lib/useRealtime";
 import { cn } from "./ui/cn";
 
 interface Payload {
@@ -233,33 +234,38 @@ export function ShipmentDrawer({
 }) {
   const [data, setData] = useState<Payload | null>(null);
   const [tab, setTab] = useState<"workflow" | "documents" | "logs">("workflow");
-  const dataRef = useRef<Payload | null>(null);
-  dataRef.current = data;
+  const idRef = useRef(id);
+  idRef.current = id;
+
+  const refresh = useCallback(async () => {
+    const cur = idRef.current;
+    if (!cur) return;
+    try {
+      const res = await fetch(`/api/shipment/${cur}/logs`, { cache: "no-store" });
+      if (res.ok) setData(await res.json());
+    } catch {
+      /* transient */
+    }
+  }, []);
+
+  // Live updates via Supabase Realtime for this shipment; slow poll fallback.
+  useRealtime(
+    ["audit_log", "classifications"],
+    refresh,
+    id ? { column: "shipment_id", value: id } : null,
+  );
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setData(null);
+      return;
+    }
     setData(null);
     setTab("workflow");
-    let alive = true;
-    let timer: ReturnType<typeof setTimeout>;
-
-    async function tick() {
-      try {
-        const res = await fetch(`/api/shipment/${id}/logs`, { cache: "no-store" });
-        if (alive && res.ok) setData(await res.json());
-      } catch {
-        /* transient */
-      }
-      if (!alive) return;
-      const st = dataRef.current?.shipment.classification_status ?? "pending";
-      timer = setTimeout(tick, IN_FLIGHT.has(st) ? 2000 : 15000);
-    }
-    tick();
-    return () => {
-      alive = false;
-      clearTimeout(timer);
-    };
-  }, [id]);
+    refresh();
+    const poll = setInterval(refresh, 12000);
+    return () => clearInterval(poll);
+  }, [id, refresh]);
 
   // Close on Escape.
   useEffect(() => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ShipmentRow } from "@/app/api/shipments/route";
 import { StatusPill } from "./ui/StatusPill";
 import { Meter } from "./ui/Meter";
@@ -9,6 +9,7 @@ import { Button } from "./ui/Button";
 import { Modal } from "./ui/Modal";
 import { ShipmentDrawer } from "./ShipmentDrawer";
 import { NewShipmentForm } from "./NewShipmentForm";
+import { useRealtime } from "@/lib/useRealtime";
 import { cn } from "./ui/cn";
 
 const IN_FLIGHT = new Set(["pending", "processing"]);
@@ -42,32 +43,34 @@ export function ShipmentsTable({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
-  const rowsRef = useRef(rows);
-  rowsRef.current = rows;
+  const aliveRef = useRef(true);
+
+  const refresh = useCallback(async () => {
+    try {
+      const res = await fetch("/api/shipments", { cache: "no-store" });
+      if (aliveRef.current && res.ok) {
+        const json = (await res.json()) as { rows: ShipmentRow[] };
+        setRows(json.rows);
+      }
+    } catch {
+      /* transient */
+    }
+  }, []);
+
+  // Live updates via Supabase Realtime (push); a slow interval is the fallback
+  // when the browser Supabase env is not configured.
+  useRealtime(["shipments", "classifications"], refresh);
 
   useEffect(() => {
-    let alive = true;
-    let timer: ReturnType<typeof setTimeout>;
-    async function tick() {
-      try {
-        const res = await fetch("/api/shipments", { cache: "no-store" });
-        if (alive && res.ok) {
-          const json = (await res.json()) as { rows: ShipmentRow[] };
-          setRows(json.rows);
-        }
-      } catch {
-        /* transient */
-      }
-      if (!alive) return;
-      const inFlight = rowsRef.current.some((r) => IN_FLIGHT.has(r.status));
-      timer = setTimeout(tick, inFlight ? 2500 : 9000);
-    }
-    timer = setTimeout(tick, 2500);
+    aliveRef.current = true;
+    const poll = setInterval(refresh, 15000);
+    const t = setTimeout(refresh, 1500);
     return () => {
-      alive = false;
-      clearTimeout(timer);
+      aliveRef.current = false;
+      clearInterval(poll);
+      clearTimeout(t);
     };
-  }, []);
+  }, [refresh]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
