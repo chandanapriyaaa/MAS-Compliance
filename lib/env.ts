@@ -47,6 +47,7 @@ export const env = {
 
   // QStash
   qstashToken: () => required("QSTASH_TOKEN"),
+  qstashUrl: () => optional("QSTASH_URL", ""),
   qstashCurrentSigningKey: () => required("QSTASH_CURRENT_SIGNING_KEY"),
   qstashNextSigningKey: () => required("QSTASH_NEXT_SIGNING_KEY"),
 

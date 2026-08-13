@@ -29,7 +29,13 @@ function isLocal(url: string): boolean {
 
 let _client: Client | null = null;
 function client(): Client {
-  if (!_client) _client = new Client({ token: env.qstashToken() });
+  if (!_client) {
+    const baseUrl = env.qstashUrl();
+    _client = new Client({
+      token: env.qstashToken(),
+      ...(baseUrl ? { baseUrl } : {}),
+    });
+  }
   return _client;
 }
 
