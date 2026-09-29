@@ -110,6 +110,56 @@ POST /api/shipment/intake
                    ┌─────────────────┴──────────────────┐
               ≥ threshold                          < threshold / flagged
               auto_approved → docgen               human_review_queue
+
+                        PRODUCT / INVOICE
+                 ↓
+        ┌─────────────────┐
+        │  1. INTAKE      │
+        │ Extract data    │
+        └────────┬────────┘
+                 ↓
+        ┌─────────────────┐
+        │ 2. HS CLASSIFY  │
+        │ RAG + Vector    │
+        │ Search          │
+        └────────┬────────┘
+                 ↓
+        ┌─────────────────┐
+        │ 3. SCHEME CHECK │
+        │ RoDTEP/Drawback │
+        │ Advance Auth.   │
+        └────────┬────────┘
+                 ↓
+        ┌─────────────────┐
+        │ 4. DUTY         │
+        │ Calculate       │
+        └────────┬────────┘
+                 ↓
+        ┌─────────────────┐
+        │ 5. CONFIDENCE   │
+        │ Evidence +      │
+        │ Agreement       │
+        └────────┬────────┘
+                 ↓
+          ┌──────────────┐
+          │ ≥ 0.85 ?     │
+          └──────┬───────┘
+             YES │ NO
+                 │
+        ┌────────┘ └──────────────┐
+        ↓                         ↓
+   FINALIZE                 HUMAN REVIEW
+        ↓                         ↓
+        └──────────┬──────────────┘
+                   ↓
+        ┌────────────────────┐
+        │ 6. DOCUMENTATION   │
+        │ Generate paperwork │
+        └─────────┬──────────┘
+                  ↓
+             AUDIT LOG
+                  ↓
+          FINAL OUTPUT
 ```
 
 | Layer | Technology |
@@ -233,55 +283,7 @@ Recommended: Vercel + managed Supabase + Upstash.
 3. Run the migrations and `npm run seed:hs` against the production database.
 4. Run the evaluation set end-to-end before go-live.
 
-          PRODUCT / INVOICE
-                 ↓
-        ┌─────────────────┐
-        │  1. INTAKE      │
-        │ Extract data    │
-        └────────┬────────┘
-                 ↓
-        ┌─────────────────┐
-        │ 2. HS CLASSIFY  │
-        │ RAG + Vector    │
-        │ Search          │
-        └────────┬────────┘
-                 ↓
-        ┌─────────────────┐
-        │ 3. SCHEME CHECK │
-        │ RoDTEP/Drawback │
-        │ Advance Auth.   │
-        └────────┬────────┘
-                 ↓
-        ┌─────────────────┐
-        │ 4. DUTY         │
-        │ Calculate       │
-        └────────┬────────┘
-                 ↓
-        ┌─────────────────┐
-        │ 5. CONFIDENCE   │
-        │ Evidence +      │
-        │ Agreement       │
-        └────────┬────────┘
-                 ↓
-          ┌──────────────┐
-          │ ≥ 0.85 ?     │
-          └──────┬───────┘
-             YES │ NO
-                 │
-        ┌────────┘ └──────────────┐
-        ↓                         ↓
-   FINALIZE                 HUMAN REVIEW
-        ↓                         ↓
-        └──────────┬──────────────┘
-                   ↓
-        ┌────────────────────┐
-        │ 6. DOCUMENTATION   │
-        │ Generate paperwork │
-        └─────────┬──────────┘
-                  ↓
-             AUDIT LOG
-                  ↓
-          FINAL OUTPUT
+        
 
 ## Security & compliance
 
