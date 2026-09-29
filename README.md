@@ -26,6 +26,64 @@ configured threshold is routed to a **human review queue** rather than auto-file
 > compliance tool: wrong output has real financial and legal consequence, so the
 > system escalates instead of guessing.
 
+                 User Input
+(Product Description / Invoice / Specification Sheet)
+
+                         ↓
+
+              Data Extraction & Processing
+   (Extract product details like material, category,
+          usage, quantity, specifications)
+
+                         ↓
+
+                 Text Embedding Generation
+     (Convert product information into numerical
+              vectors for similarity search)
+
+                         ↓
+
+              HS Knowledge Base Retrieval
+    (Search ITC-HS schedule and trade documents
+           using vector similarity search)
+
+                         ↓
+
+              HS Code Classification Agent
+   (Analyze retrieved information and identify the
+             most suitable HS classification)
+
+                         ↓
+
+          Confidence Score Calculation
+(Retrieval similarity + prediction agreement analysis)
+
+                         ↓
+
+              Confidence Decision Gate
+             
+          ┌───────────────────────┐
+          │                       │
+          ↓                       ↓
+
+ Confidence ≥ 0.85          Confidence < 0.85
+
+ Auto Approved              Human Review Queue
+
+          ↓                       ↓
+
+ Duty Calculation +        Manual Validation
+ Scheme Eligibility             
+
+          ↓
+
+     Export Documentation Generation
+
+          ↓
+
+ Audit Log Storage & Final Output
+(HS Code + Confidence + Sources + Decision Trail)
+
 ## Key features
 
 - **Six-agent pipeline** — intake → HS classification → scheme cross-check → duty → confidence gate → documentation, each a typed, Zod-validated function.
