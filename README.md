@@ -199,7 +199,7 @@ schedules before production use, with a recurring refresh process.
 
 ## Author
 
-**Designed and developed by Korada Chandana Priya.**
+**Designed and developed by Korada Chandana Priya and Kunal Reddy**
 
 Built with Next.js, Supabase, Groq, Google Gemini, and Upstash.
 
